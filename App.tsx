@@ -39,7 +39,8 @@ export default function App() {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
 
-      const idToken = userInfo.data?.idToken;
+      //const idToken = userInfo.data?.idToken;
+      const idToken = (userInfo as any).idToken;
       if (!idToken) {
         Alert.alert("Error", "No se obtuvo el idToken de Google");
         return;
