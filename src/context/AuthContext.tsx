@@ -10,6 +10,11 @@ export const AuthProvider = ({ children }: any) => {
   const [jwt, setJwt] = useState<string | null>(null);
 
   useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: "436116978721-9ch9qg5j8o62mj6v4aqtqlgccmir8e2g.apps.googleusercontent.com",
+      scopes: ["profile", "email", "openid"],
+    });
+
     const loadToken = async () => {
       const token = await AsyncStorage.getItem("jwt");
       if (token) {
@@ -24,6 +29,7 @@ export const AuthProvider = ({ children }: any) => {
         }
       }
     };
+
     loadToken();
   }, []);
 
