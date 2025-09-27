@@ -1,14 +1,90 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# FinZen Frontend Service
 
-# Getting Started
+This is a **FinZen** mobile application built with [React Native](https://reactnative.dev) and TypeScript, featuring Google authentication, animated screens, and a clean service-oriented architecture.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## 📱 Features
 
-## Step 1: Start Metro
+- **Custom Authentication**: Google Sign-in integration with JWT token management
+- **Animated UI**: Custom splash screen with letter-by-letter animations
+- **Custom Fonts**: Forque font family integration for enhanced typography
+- **Secure Configuration**: Environment variables for sensitive data protection
+- **Service Layer Architecture**: Centralized API calls and authentication management
+- **TypeScript**: Full type safety and enhanced developer experience
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## 🏗️ Project Architecture
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+The project follows a clean architecture pattern with organized folder structure:
+
+```
+src/
+├── assets/          # Images, fonts, and static resources
+├── components/      # Reusable UI components
+├── context/         # React Context providers and state management
+├── hooks/           # Custom React hooks for shared logic
+├── navigation/      # Navigation structure and routing
+├── screens/         # Screen components organized by feature
+│   ├── auth/        # Authentication screens (Login, Register)
+│   └── home/        # Main app screens (Dashboard, Splash)
+├── services/        # API services and external integrations
+├── utils/           # Helper functions and utilities
+└── types/           # TypeScript type definitions
+```
+
+### 📁 Folder Structure Details
+
+Each folder in the `src/` directory contains a detailed README.md file explaining its purpose, structure, and usage patterns. Here's a quick overview:
+
+- **assets/**: Static resources including the FinZen logo, Forque font files, and any images or icons
+- **components/**: Reusable UI components with consistent styling and behavior
+- **context/**: React Context providers for global state management (auth, theme, etc.)
+- **hooks/**: Custom hooks for authentication, API calls, storage, and shared business logic
+- **navigation/**: Navigation configuration with stack, tab, and auth flow navigation
+- **screens/**: Feature-organized screen components with authentication and main app screens
+- **services/**: Centralized service layer for API calls, authentication, and external integrations
+- **utils/**: Helper functions, constants, validation, and formatting utilities
+- **types/**: TypeScript interfaces and type definitions for the entire application
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+Make sure you have completed the [React Native Environment Setup](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+
+### Installation
+
+1. **Clone the repository**
+```bash
+git clone <repository-url>
+cd FINZEN_FRONTEND_SERVICE
+```
+
+2. **Install dependencies**
+```bash
+# Using npm
+npm install
+
+# OR using Yarn
+yarn install
+```
+
+3. **Environment Configuration**
+
+Create a `.env` file in the root directory with the following variables:
+```env
+API_BASE_URL=https://your-api-url.com
+GOOGLE_WEB_CLIENT_ID=your-google-web-client-id
+```
+
+4. **iOS Setup (iOS only)**
+```bash
+# Install CocoaPods dependencies
+bundle install
+bundle exec pod install
+```
+
+### Running the App
+
+1. **Start Metro Bundle**
 
 ```sh
 # Using npm
@@ -18,23 +94,27 @@ npm start
 yarn start
 ```
 
-## Step 2: Build and run your app
+## Step 2: Run on Device/Emulator
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
-
-### Android
-
-```sh
-# Using npm
+**Android:**
+```bash
 npm run android
-
-# OR using Yarn
+# OR
 yarn android
 ```
 
-### iOS
+**iOS:**
+```bash
+npm run ios
+# OR
+yarn ios
+```
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+## 🔧 Configuration
+
+### Environment Variables
+
+The app uses `react-native-dotenv` for environment variable management. Key variables include:
 
 The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
 
