@@ -1,92 +1,63 @@
 import React, { useEffect, useState } from 'react';
-import { Button, View, Text, Alert, ActivityIndicator } from 'react-native';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
+import { View, ActivityIndicator } from 'react-native';
+import SplashScreen from './src/screens/home/SplashScreen';
+import LoginScreen from './src/screens/auth/LoginScreen';
+import Dashboard from './src/screens/dashboard/Dashboard';
+import AuthService from './src/services/AuthService';
 
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    GoogleSignin.configure({
-      webClientId: "436116978721-9ch9qg5j8o62mj6v4aqtqlgccmir8e2g.apps.googleusercontent.com",
-      scopes: ['profile', 'email', 'openid'],
-    });
+    // Configure Google Sign-In
+    AuthService.configureGoogleSignIn();
 
     const checkLogin = async () => {
-      const token = await AsyncStorage.getItem("jwt");
-      if (token) {
-        try {
-          const response = await axios.get("http://192.168.0.14:8080/api/users/me", {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          setUser(response.data);
-          console.log("Usuario logueado:", response.data);
-        } catch (error) {
-          console.log("JWT inválido, limpiando...");
-          await AsyncStorage.removeItem("jwt");
+      try {
+        const userData = await AuthService.checkAuthStatus();
+        if (userData) {
+          setUser(userData);
+          console.log("Usuario logueado:", userData);
         }
+      } catch (error) {
+        console.log("Error checking auth status:", error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     checkLogin();
   }, []);
 
-  const handleGoogleLogin = async () => {
-    try {
-      await GoogleSignin.hasPlayServices();
-      const userInfo = await GoogleSignin.signIn();
-      const idToken = userInfo.data?.idToken;
-
-      if (!idToken) {
-        Alert.alert("Error", "No se obtuvo el idToken de Google");
-        console.log("userInfo completo:", JSON.stringify(userInfo, null, 2));
-        return;
-      }
-      console.log("Google idToken:", idToken);
-      const response = await axios.post("http://192.168.0.14:8080/api/auth/google", { idToken });
-
-      const jwt = response.data.accessToken;
-      await AsyncStorage.setItem("jwt", jwt);
-      console.log("JWT GENERADO POR NUESTRO BACKEND:", jwt);
-      const meResponse = await axios.get("http://192.168.0.14:8080/api/users/me", {
-        headers: { Authorization: `Bearer ${jwt}` },
-      });
-
-      setUser(meResponse.data);
-      console.log("Login exitoso, usuario:", meResponse.data);
-      Alert.alert("Login exitoso ✅");
-
-    } catch (error: any) {
-      console.error("Error en login:", error);
-      Alert.alert("Error en login", error.message);
-    }
+  const handleSplashFinish = () => {
+    setShowSplash(false);
   };
+
+  const handleLogin = (userData: any) => {
+    setUser(userData);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+  };
+
+  if (showSplash) {
+    return <SplashScreen onFinish={handleSplashFinish} />;
+  }
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" />
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: '#e9efe9ff' }}>
+        <ActivityIndicator size="large" color="#37706b" />
       </View>
     );
   }
 
   if (user) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text>Bienvenido a FinZen 🎉</Text>
-        <Text>{user.name}</Text>
-        <Text>{user.email}</Text>
-      </View>
-    );
+    return <Dashboard user={user} onLogout={handleLogout} />;
   }
 
-  return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Text>Bienvenido a FinZen</Text>
-      <Button title="Iniciar sesión con Google" onPress={handleGoogleLogin} />
-    </View>
-  );
+  return <LoginScreen onLogin={handleLogin} />;
 }
