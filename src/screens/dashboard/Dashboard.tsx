@@ -14,7 +14,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
     try {
       await AuthService.logout();
       onLogout();
-      Alert.alert("Logout exitoso", "Has cerrado sesión correctamente");
     } catch (error) {
       console.error("Error en logout:", error);
       Alert.alert("Error", "No se pudo cerrar sesión");

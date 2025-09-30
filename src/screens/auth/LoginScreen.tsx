@@ -14,7 +14,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
     try {
       const userData = await AuthService.loginWithGoogle();
       onLogin(userData);
-      Alert.alert("Login exitoso ✅");
     } catch (error: any) {
       console.error("Error en login:", error);
       Alert.alert("Error en login", error.message);

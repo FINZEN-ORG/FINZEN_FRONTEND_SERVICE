@@ -21,6 +21,9 @@ class AuthService {
     GoogleSignin.configure({
       webClientId: GOOGLE_WEB_CLIENT_ID,
       scopes: ['profile', 'email', 'openid'],
+      offlineAccess: false, // We don't need offline access
+      hostedDomain: '', // No specific domain
+      forceCodeForRefreshToken: true, // Force refresh token
     });
   }
 
@@ -29,6 +32,16 @@ class AuthService {
     try {
       // Check if device supports Google Play Services
       await GoogleSignin.hasPlayServices();
+      
+      // Try to get current user to check if already signed in
+      try {
+        const currentUser = await GoogleSignin.getCurrentUser();
+        if (currentUser) {
+          await GoogleSignin.signOut();
+        }
+      } catch (error) {
+        // No user currently signed in
+      }
       
       // Get user info from Google
       const userInfo = await GoogleSignin.signIn();
@@ -102,12 +115,22 @@ class AuthService {
   // Logout user
   static async logout(): Promise<void> {
     try {
-      // Remove JWT token
+      // Remove JWT token first
       await AsyncStorage.removeItem("jwt");
       
       // Sign out from Google
-      await GoogleSignin.revokeAccess();
-      await GoogleSignin.signOut();
+      try {
+        await GoogleSignin.revokeAccess();
+      } catch (revokeError) {
+        console.log("Warning: Could not revoke Google access");
+      }
+      
+      try {
+        await GoogleSignin.signOut();
+      } catch (signOutError) {
+        console.log("Warning: Could not sign out from Google");
+      }
+      
     } catch (error) {
       console.error("Error during logout:", error);
       // Even if Google signout fails, remove the token
