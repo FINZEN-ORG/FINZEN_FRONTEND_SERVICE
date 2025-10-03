@@ -13,6 +13,7 @@ export type AppStackParamList = {
   Coach: undefined;
   Budget: undefined;
   Reports: undefined;
+  NewCategory: undefined;
   // Pantallas adicionales que necesiten stack navigation
   AddExpense: undefined;
   AddIncome: undefined;

@@ -51,9 +51,8 @@ const BudgetScreen: React.FC = () => {
   };
 
   const handleCreateCategory = () => {
-    setShowFloatingMenu(false);
-    // TODO: Navegar a pantalla de CreateCategory cuando esté creada
-    console.log('Navegar a Crear Categoría');
+  setShowFloatingMenu(false);
+  navigation.navigate('NewCategory');
   };
 
   return (
