@@ -8,11 +8,18 @@ export type AuthStackParamList = {
 
 // Types for app stack (authenticated screens)
 export type AppStackParamList = {
-  Dashboard: undefined;
+  Main: undefined; // TabNavigator principal
+  Goals: undefined;
+  Coach: undefined;
+  Budget: undefined;
+  Reports: undefined;
+  // Pantallas adicionales que necesiten stack navigation
+  AddExpense: undefined;
+  AddIncome: undefined;
   // Futuras pantallas autenticadas
   // Profile: undefined;
   // Settings: undefined;
-  // Transactions: undefined;
+  // TransactionDetail: { transactionId: string };
 };
 
 // Combined type for type checking and legacy compatibility

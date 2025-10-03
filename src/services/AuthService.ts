@@ -61,6 +61,10 @@ class AuthService {
       // Save JWT token
       await AsyncStorage.setItem("jwt", jwt);
       
+      // Log del token guardado
+      console.log('✅ JWT TOKEN GUARDADO:', jwt);
+      console.log('📅 TOKEN GUARDADO EN:', new Date().toLocaleString());
+      
       // Get user data from backend
       const userData = await this.getCurrentUser();
       

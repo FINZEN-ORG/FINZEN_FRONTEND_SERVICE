@@ -2,23 +2,27 @@ import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import { AppStackParamList } from "../types";
 
-import Dashboard from "../screens/dashboard/Dashboard";
+import TabNavigator from "../components/TabNavigator/TabNavigator";
+import AddExpenseScreen from "../screens/expenses/AddExpenseScreen";
+import AddIncomeScreen from "../screens/income/AddIncomeScreen";
 
 const Stack = createStackNavigator<AppStackParamList>();
 
 export default function AppStack() {
   return (
     <Stack.Navigator
-      initialRouteName="Dashboard"
       screenOptions={{ 
         headerShown: false, 
         gestureEnabled: false 
       }}
     >
-      <Stack.Screen name="Dashboard" component={Dashboard} />
+      <Stack.Screen name="Main" component={TabNavigator} />
+      <Stack.Screen name="AddExpense" component={AddExpenseScreen} />
+      <Stack.Screen name="AddIncome" component={AddIncomeScreen} />
       
-      {/* Futuras pantallas autenticadas */}
+      {/* Futuras pantallas que necesiten stack navigation */}
       {/* <Stack.Screen name="Profile" component={ProfileScreen} /> */}
+      {/* <Stack.Screen name="Settings" component={SettingsScreen} /> */}
     </Stack.Navigator>
   );
 }
