@@ -71,6 +71,11 @@ class AuthService {
     }
   }
 
+  // Complete login flow with Google (for use with AuthContext)
+  static async performGoogleLogin(): Promise<User> {
+    return await this.loginWithGoogle();
+  }
+
   // Get current user data
   static async getCurrentUser(): Promise<User> {
     try {
