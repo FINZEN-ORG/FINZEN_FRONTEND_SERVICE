@@ -49,7 +49,7 @@ const AddIncomeScreen: React.FC = () => {
         amount: parseFloat(amount),
         description: description.trim(),
         categoryId: selectedCategory,
-        date,
+        date: date,
       };
 
       const response = await TransactionService.createIncome(data);
