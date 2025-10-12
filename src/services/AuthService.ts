@@ -1,7 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { API_BASE_URL, GOOGLE_WEB_CLIENT_ID } from '@env';
+import { USERS_API_BASE_URL, GOOGLE_WEB_CLIENT_ID } from '@env';
 
 export interface User {
   id: string;
@@ -52,7 +52,7 @@ class AuthService {
       }
 
       // Send idToken to backend
-      const response = await axios.post(`${API_BASE_URL}/auth/google`, { 
+      const response = await axios.post(`${USERS_API_BASE_URL}/auth/google`, {
         idToken 
       });
 
@@ -89,7 +89,7 @@ class AuthService {
         throw new Error('No authentication token found');
       }
 
-      const response = await axios.get(`${API_BASE_URL}/users/me`, {
+      const response = await axios.get(`${USERS_API_BASE_URL}/users/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

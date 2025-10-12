@@ -11,6 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import { CategoriesSection, DatePicker, HeaderWithBack } from '../../components';
 import { addExpenseStyles } from './AddExpenseScreen.Style';
 import { globalStyles } from '../../styles';
+import TransactionService from '../../services/TransactionService';
 
 const AddExpenseScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -24,134 +25,115 @@ const AddExpenseScreen: React.FC = () => {
     console.log(`Categoría seleccionada: ${title} (ID: ${categoryId})`);
   };
 
-  const handleConfirm = () => {
-    // Validación básica de campos
+  const handleConfirm = async () => {
     if (!amount || parseFloat(amount) <= 0) {
       Alert.alert('Error', 'El monto debe ser mayor a 0');
       return;
     }
-    
     if (!description.trim()) {
       Alert.alert('Error', 'La descripción es requerida');
       return;
     }
-    
     if (selectedCategory === null) {
       Alert.alert('Error', 'Debes seleccionar una categoría');
       return;
     }
-    
     if (!date) {
       Alert.alert('Error', 'La fecha es requerida');
       return;
     }
 
-    // Simular guardado local (aquí puedes agregar lógica de almacenamiento local si necesitas)
-    console.log('💰 Gasto registrado localmente:', {
-      amount: parseFloat(amount),
-      description: description.trim(),
-      categoryId: selectedCategory,
-      date: date,
-    });
-    
-    // Mostrar mensaje de éxito
-    Alert.alert(
-      '✅ ¡Éxito!', 
-      'El gasto ha sido registrado correctamente.',
-      [
-        {
-          text: 'OK',
-          onPress: () => navigation.goBack(),
-        },
-      ]
-    );
+    try {
+      const data = {
+        amount: parseFloat(amount),
+        description: description.trim(),
+        categoryId: selectedCategory,
+        date: date,
+      };
+
+      const response = await TransactionService.createExpense(data);
+      console.log('✅ Gasto registrado en backend:', response);
+
+      Alert.alert('✅ ¡Éxito!', 'El gasto ha sido registrado correctamente.', [
+        { text: 'OK', onPress: () => navigation.goBack() },
+      ]);
+    } catch (error: any) {
+      console.error('Error al registrar gasto:', error);
+      Alert.alert('Error', 'No se pudo registrar el gasto. Intenta nuevamente.');
+    }
   };
 
-
-  const handleCancel = () => {
-    navigation.goBack();
-  };
+  const handleCancel = () => navigation.goBack();
 
   const formatAmount = (text: string) => {
-    // Eliminar caracteres no numéricos excepto punto
     const cleanText = text.replace(/[^0-9.]/g, '');
     setAmount(cleanText);
   };
 
   return (
-    <SafeAreaView style={globalStyles.screenContainer}>
-      {/* Header */}
-      <HeaderWithBack 
-        title="Añadir Gasto"
-        onBackPress={() => navigation.goBack()}
-      />
+      <SafeAreaView style={globalStyles.screenContainer}>
+        <HeaderWithBack title="Añadir Gasto" onBackPress={() => navigation.goBack()} />
 
-      <View style={addExpenseStyles.container}>
-        {/* Monto del gasto */}
-        <View style={addExpenseStyles.section}>
-          <Text style={addExpenseStyles.label}>Monto del gasto</Text>
-          <TextInput
-            style={addExpenseStyles.amountInput}
-            value={amount}
-            onChangeText={formatAmount}
-            placeholder="$ 0.00"
-            placeholderTextColor="#999"
-            keyboardType="numeric"
-          />
+        <View style={addExpenseStyles.container}>
+          {/* Monto */}
+          <View style={addExpenseStyles.section}>
+            <Text style={addExpenseStyles.label}>Monto del gasto</Text>
+            <TextInput
+                style={addExpenseStyles.amountInput}
+                value={amount}
+                onChangeText={formatAmount}
+                placeholder="$ 0.00"
+                placeholderTextColor="#999"
+                keyboardType="numeric"
+            />
+          </View>
+
+          {/* Descripción */}
+          <View style={addExpenseStyles.section}>
+            <Text style={addExpenseStyles.label}>Descripción:</Text>
+            <TextInput
+                style={addExpenseStyles.descriptionInput}
+                value={description}
+                onChangeText={setDescription}
+                placeholder="Ej: Café con amigos"
+                placeholderTextColor="#999"
+            />
+          </View>
+
+          {/* Categorías */}
+          <View style={addExpenseStyles.section}>
+            <Text style={addExpenseStyles.label}>Categorías:</Text>
+            <CategoriesSection
+                onCategoryPress={handleCategorySelect}
+                selectedCategory={selectedCategory}
+                selectionMode={true}
+                containerStyle={addExpenseStyles.categoriesSection}
+            />
+          </View>
+
+          {/* Fecha */}
+          <View style={addExpenseStyles.section}>
+            <Text style={addExpenseStyles.label}>Fecha</Text>
+            <DatePicker
+                value={date}
+                onDateChange={setDate}
+                placeholder="Seleccionar fecha"
+                format="MM/DD/YYYY"
+            />
+          </View>
         </View>
 
-        {/* Descripción */}
-        <View style={addExpenseStyles.section}>
-          <Text style={addExpenseStyles.label}>Descripción:</Text>
-          <TextInput
-            style={addExpenseStyles.descriptionInput}
-            value={description}
-            onChangeText={setDescription}
-            placeholder="Ej: Café con amigos"
-            placeholderTextColor="#999"
-          />
-        </View>
+        {/* Botones */}
+        <View style={addExpenseStyles.buttonsContainer}>
+          <TouchableOpacity style={addExpenseStyles.confirmButton} onPress={handleConfirm}>
+            <Text style={addExpenseStyles.confirmButtonText}>Confirmar</Text>
+          </TouchableOpacity>
 
-        {/* Categorías */}
-        <View style={addExpenseStyles.section}>
-          <Text style={addExpenseStyles.label}>Categorías:</Text>
-          <CategoriesSection
-            onCategoryPress={handleCategorySelect}
-            selectedCategory={selectedCategory}
-            selectionMode={true}
-            containerStyle={addExpenseStyles.categoriesSection}
-          />
+          <TouchableOpacity style={addExpenseStyles.cancelButton} onPress={handleCancel}>
+            <Text style={addExpenseStyles.cancelButtonText}>Cancelar</Text>
+          </TouchableOpacity>
         </View>
-
-        {/* Fecha */}
-        <View style={addExpenseStyles.section}>
-          <Text style={addExpenseStyles.label}>Fecha</Text>
-          <DatePicker
-            value={date}
-            onDateChange={setDate}
-            placeholder="Seleccionar fecha"
-            format="MM/DD/YYYY"
-          />
-        </View>
-      </View>
-
-      {/* Botones de acción */}
-      <View style={addExpenseStyles.buttonsContainer}>
-        <TouchableOpacity 
-          style={addExpenseStyles.confirmButton}
-          onPress={handleConfirm}
-        >
-          <Text style={addExpenseStyles.confirmButtonText}>Confirmar</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={addExpenseStyles.cancelButton}
-          onPress={handleCancel}
-        >
-          <Text style={addExpenseStyles.cancelButtonText}>Cancelar</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
   );
 };
 
