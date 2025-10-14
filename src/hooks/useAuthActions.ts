@@ -27,9 +27,9 @@ export const useAuthActions = () => {
         console.log('🔐 JWT TOKEN LENGTH:', storedToken ? storedToken.length : 0);
       }
 
-  // Obtener token almacenado y pasarlo al contexto para poder mostrarlo en UI si es necesario
-  const token = storedToken ?? await AuthService.getToken();
-  login(userData, token);
+      // Obtener token almacenado y pasarlo al contexto para poder mostrarlo en UI si es necesario
+      const token = storedToken ?? await AuthService.getToken();
+      login(userData, token);
       return userData;
     } catch (error: any) {
       console.error("Error en login:", error);
