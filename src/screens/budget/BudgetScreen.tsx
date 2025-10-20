@@ -5,16 +5,45 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { AppStackParamList } from '../../types/navigation';
 import {
     ScreenTitle,
-    AIMessage,
-    MessageType,
     SectionSubtitle,
     CategoriesSection,
     ExpensesList,
     FloatingActionButton
 } from '../../components';
+import AIMessage, { MessageType } from '../../components/AIMessage';
 import { globalStyles } from '../../styles';
 import CategoryService, { CategoryDto } from '../../services/CategoryService';
 import TransactionService, { TransactionResponse } from '../../services/TransactionService';
+
+// ✅ Mapeo de categorías a emojis
+const CATEGORY_EMOJIS: { [key: string]: string } = {
+    'Food': '🍔',
+    'Transport': '⛽',
+    'Entertainment': '🎬',
+    'Health': '🏥',
+    'Housing': '🏠',
+    'Salary': '💼',
+    'Other': '📦',
+    // Nombres en español (por si cambian)
+    'Comida': '🍔',
+    'Transporte': '⛽',
+    'Entretenimiento': '🎬',
+    'Salud': '🏥',
+    'Vivienda': '🏠',
+    'Salario': '💼',
+    'Otro': '📦',
+    'Educación': '📚',
+    'Servicios y Facturas': '💡',
+    'Ropa y Accesorios': '👕',
+    'Compras': '🛒',
+    'Inversiones': '📈',
+    'Regalos': '🎁',
+    'Reembolsos': '💰',
+    'Ventas': '🛍️',
+    'Alquiler': '🏠',
+    'Freelance': '🧾',
+    'Otros': '📜',
+};
 
 const BudgetScreen: React.FC = () => {
     const navigation = useNavigation<StackNavigationProp<AppStackParamList>>();
@@ -23,7 +52,6 @@ const BudgetScreen: React.FC = () => {
     const [expenses, setExpenses] = useState<TransactionResponse[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // Recargar datos cada vez que la pantalla recibe foco
     useFocusEffect(
         useCallback(() => {
             loadData();
@@ -50,6 +78,33 @@ const BudgetScreen: React.FC = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    // ✅ Función para convertir CategoryDto al formato esperado por CategoriesSection
+    const mapCategoriesToDisplay = () => {
+        return categories.map(cat => ({
+            id: cat.id,
+            logo: CATEGORY_EMOJIS[cat.name] || '📦', // Emoji por defecto si no existe
+            title: cat.name
+        }));
+    };
+
+    // ✅ Función para convertir TransactionResponse al formato esperado por ExpensesList
+    const mapExpensesToDisplay = () => {
+        return expenses.map(expense => {
+            // Buscar la categoría correspondiente
+            const category = categories.find(c => c.id === expense.categoryId);
+            const categoryName = category?.name || 'Other';
+
+            return {
+                id: expense.id,
+                categoryIcon: CATEGORY_EMOJIS[categoryName] || '📦',
+                description: expense.description,
+                amount: expense.amount,
+                date: new Date(expense.date).toISOString().split('T')[0], // Formato YYYY-MM-DD
+                category: categoryName.toLowerCase()
+            };
+        });
     };
 
     const handleCategoryPress = (categoryId: number, title: string) => {
@@ -96,7 +151,7 @@ const BudgetScreen: React.FC = () => {
 
             {expenses.length > 0 && (
                 <AIMessage
-                    type="info" as MessageType
+                    type={'info' as MessageType}
                     mensaje={`Has registrado ${expenses.length} gastos este mes`}
                 />
             )}
@@ -106,7 +161,7 @@ const BudgetScreen: React.FC = () => {
                 marginTop={true}
             />
             <CategoriesSection
-                categories={categories}
+                categories={mapCategoriesToDisplay()} // ✅ Convertir al formato esperado
                 onCategoryPress={handleCategoryPress}
             />
 
@@ -115,7 +170,7 @@ const BudgetScreen: React.FC = () => {
                 marginTop={true}
             />
             <ExpensesList
-                expenses={expenses}
+                expenses={mapExpensesToDisplay()} // ✅ Convertir al formato esperado
                 onExpensePress={handleExpensePress}
             />
 

@@ -3,7 +3,7 @@ import { View, Text } from 'react-native';
 import { styles } from './AIMessage.styles';
 import { colors } from '../../styles';
 
-export type MessageType = 'emergency' | 'regular' | 'good';
+export type MessageType = 'emergency' | 'regular' | 'good' | 'info';
 
 export interface AIMessageProps {
   mensaje: string;
@@ -12,11 +12,10 @@ export interface AIMessageProps {
 }
 
 export const AIMessage: React.FC<AIMessageProps> = ({
-  mensaje,
-  titulo,
-  type = 'good',
-  
-}) => {
+                                                      mensaje,
+                                                      titulo,
+                                                      type = 'good',
+                                                    }) => {
   const getColorByType = (messageType: MessageType) => {
     switch (messageType) {
       case 'emergency':
@@ -25,6 +24,8 @@ export const AIMessage: React.FC<AIMessageProps> = ({
         return colors.aiMessages.regular;
       case 'good':
         return colors.aiMessages.good;
+      case 'info':
+        return '#6C5CE7';
       default:
         return colors.aiMessages.good;
     }
@@ -33,12 +34,12 @@ export const AIMessage: React.FC<AIMessageProps> = ({
   const backgroundColor = getColorByType(type);
 
   return (
-    <View style={[styles.container, { backgroundColor }]}>
-      {titulo && (
-        <Text style={styles.titulo}>{titulo}</Text>
-      )}
-      <Text style={styles.mensaje}>{mensaje}</Text>
-    </View>
+      <View style={[styles.container, { backgroundColor }]}>
+        {titulo && (
+            <Text style={styles.titulo}>{titulo}</Text>
+        )}
+        <Text style={styles.mensaje}>{mensaje}</Text>
+      </View>
   );
 };
 

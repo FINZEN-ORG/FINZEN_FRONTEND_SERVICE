@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
 import { dashboardStyles } from './Dashboard.Style';
@@ -9,19 +10,23 @@ import { useFocusEffect } from '@react-navigation/native';
 interface DashboardProps {}
 
 const Dashboard: React.FC<DashboardProps> = () => {
+    // ✅ TODOS LOS HOOKS AL INICIO, ANTES DE CUALQUIER CONDICIONAL
     const { user } = useAuth();
     const { handleLogout } = useAuthActions();
+
     const [transactions, setTransactions] = useState<TransactionResponse[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [totalIncome, setTotalIncome] = useState(0);
     const [totalExpense, setTotalExpense] = useState(0);
 
-    // Recargar datos cada vez que la pantalla recibe foco
+    // ✅ useFocusEffect DEBE estar aquí, no después de condicionales
     useFocusEffect(
         useCallback(() => {
-            loadDashboardData();
-        }, [])
+            if (user) {
+                loadDashboardData();
+            }
+        }, [user])
     );
 
     const loadDashboardData = async () => {
@@ -63,6 +68,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
         }
     };
 
+    // ✅ AHORA SÍ, después de todos los hooks, verificar user
     if (!user) {
         return (
             <View style={dashboardStyles.container}>
