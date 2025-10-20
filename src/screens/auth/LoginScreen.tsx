@@ -1,33 +1,42 @@
 import { loginStyles as styles } from './LoginScreen.Style';
 import React from 'react';
-import { TouchableOpacity, View, Text, Alert, Image } from 'react-native';
+import { TouchableOpacity, View, Text, Image } from 'react-native';
 import LogoFinZen from '../../assets/images/finzen-NoBackground.png';
-import AuthService from '../../services/AuthService';
+import { useAuthActions } from '../../hooks/useAuthActions';
+import { useAuth } from '../../context/AuthContext';
+import {globalStyles} from '../../styles/index';
 
-interface LoginScreenProps {
-  onLogin: (userData: any) => void;
-}
+interface LoginScreenProps {}
 
-const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
+const LoginScreen: React.FC<LoginScreenProps> = () => {
+  const { handleGoogleLogin } = useAuthActions();
+  const { /* user, */ /* isLoading, */ /* isAuthenticated, */ login } = useAuth();
+  // token is injected into context value as any.token in AuthContext
+  const token = (login as any)?.token ?? (useAuth as any)?.token;
 
-  const handleGoogleLogin = async () => {
+  const devTokenStyle = { marginTop: 8, fontSize: 12, color: '#444' } as const;
+
+  const onGoogleLogin = async () => {
     try {
-      const userData = await AuthService.loginWithGoogle();
-      onLogin(userData);
-      Alert.alert("Login exitoso ✅");
-    } catch (error: any) {
-      console.error("Error en login:", error);
-      Alert.alert("Error en login", error.message);
+      await handleGoogleLogin();
+    } catch (error) {
+      // Error is already handled in useAuthActions
     }
   };
 
   return (
-    <View style={styles.container}>
+    <View style={globalStyles.screenContainer}>
       <View style={styles.imageContainer}>
         <Image source={LogoFinZen} style={styles.logo} />
       </View>
-      <Text style={styles.title}>Bienvenido a FinZen</Text>
-      <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
+      <Text style={globalStyles.title}>Bienvenido a FinZen</Text>
+      {/* Mostrar token completo solo en desarrollo */}
+      {__DEV__ && token && (
+        <Text style={devTokenStyle} selectable>
+          {`TOKEN: ${token}`}
+        </Text>
+      )}
+      <TouchableOpacity style={styles.googleButton} onPress={onGoogleLogin}>
         <Text style={styles.googleButtonText}>Iniciar sesión con Google</Text>
       </TouchableOpacity>
     </View>

@@ -71,8 +71,12 @@ yarn install
 
 Create a `.env` file in the root directory with the following variables:
 ```env
-API_BASE_URL=https://your-api-url.com
-GOOGLE_WEB_CLIENT_ID=your-google-web-client-id
+# APIs Configuration
+USERS_API_BASE_URL=http://your-backend-url:port/api
+TRANSACTIONS_API_BASE_URL=http://your-backend-url:port/api
+GOALS_API_BASE_URL=http://your-backend-url:port/api
+# Google OAuth Configuration
+GOOGLE_WEB_CLIENT_ID=your-google-web-client-id.apps.googleusercontent.com
 ```
 
 4. **iOS Setup (iOS only)**

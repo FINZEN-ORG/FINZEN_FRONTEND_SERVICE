@@ -1,7 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { API_BASE_URL, GOOGLE_WEB_CLIENT_ID } from '@env';
+import { USERS_API_BASE_URL, GOOGLE_WEB_CLIENT_ID } from '@env';
 
 export interface User {
   id: string;
@@ -21,6 +21,9 @@ class AuthService {
     GoogleSignin.configure({
       webClientId: GOOGLE_WEB_CLIENT_ID,
       scopes: ['profile', 'email', 'openid'],
+      offlineAccess: false, // We don't need offline access
+      hostedDomain: '', // No specific domain
+      forceCodeForRefreshToken: true, // Force refresh token
     });
   }
 
@@ -29,6 +32,16 @@ class AuthService {
     try {
       // Check if device supports Google Play Services
       await GoogleSignin.hasPlayServices();
+      
+      // Try to get current user to check if already signed in
+      try {
+        const currentUser = await GoogleSignin.getCurrentUser();
+        if (currentUser) {
+          await GoogleSignin.signOut();
+        }
+      } catch (error) {
+        // No user currently signed in
+      }
       
       // Get user info from Google
       const userInfo = await GoogleSignin.signIn();
@@ -39,7 +52,7 @@ class AuthService {
       }
 
       // Send idToken to backend
-      const response = await axios.post(`${API_BASE_URL}/auth/google`, { 
+      const response = await axios.post(`${USERS_API_BASE_URL}/auth/google`, {
         idToken 
       });
 
@@ -47,6 +60,10 @@ class AuthService {
       
       // Save JWT token
       await AsyncStorage.setItem("jwt", jwt);
+      
+      // Log del token guardado
+      console.log('✅ JWT TOKEN GUARDADO:', jwt);
+      console.log('📅 TOKEN GUARDADO EN:', new Date().toLocaleString());
       
       // Get user data from backend
       const userData = await this.getCurrentUser();
@@ -58,6 +75,11 @@ class AuthService {
     }
   }
 
+  // Complete login flow with Google (for use with AuthContext)
+  static async performGoogleLogin(): Promise<User> {
+    return await this.loginWithGoogle();
+  }
+
   // Get current user data
   static async getCurrentUser(): Promise<User> {
     try {
@@ -67,7 +89,7 @@ class AuthService {
         throw new Error('No authentication token found');
       }
 
-      const response = await axios.get(`${API_BASE_URL}/users/me`, {
+      const response = await axios.get(`${USERS_API_BASE_URL}/users/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -102,12 +124,22 @@ class AuthService {
   // Logout user
   static async logout(): Promise<void> {
     try {
-      // Remove JWT token
+      // Remove JWT token first
       await AsyncStorage.removeItem("jwt");
       
       // Sign out from Google
-      await GoogleSignin.revokeAccess();
-      await GoogleSignin.signOut();
+      try {
+        await GoogleSignin.revokeAccess();
+      } catch (revokeError) {
+        console.log("Warning: Could not revoke Google access");
+      }
+      
+      try {
+        await GoogleSignin.signOut();
+      } catch (signOutError) {
+        console.log("Warning: Could not sign out from Google");
+      }
+      
     } catch (error) {
       console.error("Error during logout:", error);
       // Even if Google signout fails, remove the token

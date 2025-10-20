@@ -1,12 +1,6 @@
 import { StyleSheet } from 'react-native';
 
 export const loginStyles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#e9efe9ff',
-    padding: 30,
-    justifyContent: 'flex-start',
-  },
   imageContainer: {
     flex: 0.6,
     justifyContent: 'flex-start',
@@ -18,13 +12,7 @@ export const loginStyles = StyleSheet.create({
     height: '100%',
     resizeMode: 'contain', 
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 20,
-    fontFamily: 'Forque',
-  },
+
   googleButton: {
     backgroundColor: '#37706b', 
     paddingVertical: 15,

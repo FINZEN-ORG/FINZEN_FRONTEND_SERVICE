@@ -1,25 +1,30 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { dashboardStyles } from './Dashboard.Style';
-import AuthService from '../../services/AuthService';
+import { useAuth } from '../../context/AuthContext';
+import { useAuthActions } from '../../hooks/useAuthActions';
 
-interface DashboardProps {
-  user: any;
-  onLogout: () => void;
-}
+interface DashboardProps {}
 
-const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
-  
-  const handleLogout = async () => {
+const Dashboard: React.FC<DashboardProps> = () => {
+  const { user } = useAuth();
+  const { handleLogout } = useAuthActions();
+
+  const onLogoutPress = async () => {
     try {
-      await AuthService.logout();
-      onLogout();
-      Alert.alert("Logout exitoso", "Has cerrado sesión correctamente");
+      await handleLogout();
     } catch (error) {
-      console.error("Error en logout:", error);
-      Alert.alert("Error", "No se pudo cerrar sesión");
+      // Error is already handled in useAuthActions
     }
   };
+
+  if (!user) {
+    return (
+      <View style={dashboardStyles.container}>
+        <Text>Cargando...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={dashboardStyles.container}>
@@ -39,7 +44,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
       <View style={dashboardStyles.footer}>
         <TouchableOpacity 
           style={dashboardStyles.logoutButton} 
-          onPress={handleLogout}
+          onPress={onLogoutPress}
         >
           <Text style={dashboardStyles.logoutButtonText}>Cerrar Sesión</Text>
         </TouchableOpacity>

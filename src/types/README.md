@@ -1,86 +1,117 @@
 # Types Folder
 
-This folder contains TypeScript type definitions and interfaces used throughout the application.
+Esta carpeta contiene todas las definiciones de tipos TypeScript utilizadas en la aplicación.
 
-## Purpose
-- Centralized type definitions
-- Shared interfaces and types
-- Environment variable declarations
-- API response types
+## ✅ Archivos de tipos actuales
 
-## Current Type Files
-- **env.d.ts** - Environment variable declarations
-- **images.d.ts** - Image import declarations
-- **api.ts** - API request/response types
-- **user.ts** - User-related type definitions
-- **navigation.ts** - Navigation type definitions
+- **env.d.ts** - Declaraciones de variables de entorno
+- **images.d.ts** - Declaraciones para imports de imágenes
+- **navigation.ts** - Tipos de navegación (AuthStack, AppStack)
+- **index.ts** - Exporta todos los tipos de manera centralizada
 
-## Structure
+## 📁 Estructura organizada
+
 ```
 types/
-├── env.d.ts
-├── images.d.ts
-├── api.ts
-├── user.ts
-├── navigation.ts
-└── index.ts
+├── env.d.ts          # Variables de entorno
+├── images.d.ts       # Imports de imágenes
+├── navigation.ts     # ✅ Tipos de navegación
+├── index.ts          # ✅ Exportador central
+└── README.md         # Esta documentación
 ```
 
-## Current Implementation
-Currently implemented type files:
-- `env.d.ts` - Environment variable declarations for react-native-dotenv
-- `images.d.ts` - Image import declarations for assets
+## 🧩 Tipos de navegación implementados
 
-## Example Type Definitions
-
-### User Types
+### AuthStack (Pantallas sin autenticación)
 ```typescript
-// user.ts
+export type AuthStackParamList = {
+  Login: undefined;
+  // Futuras pantallas:
+  // Register: undefined;
+  // ForgotPassword: undefined;
+};
+```
+
+### AppStack (Pantallas autenticadas)
+```typescript
+export type AppStackParamList = {
+  Dashboard: undefined;
+  // Futuras pantallas:
+  // Profile: undefined;
+  // Settings: undefined;
+  // Transactions: undefined;
+};
+```
+
+### Tipo combinado
+```typescript
+export type RootStackParamList = AuthStackParamList & AppStackParamList;
+```
+
+## 🚀 Cómo usar los tipos
+
+### Importación simple desde index
+```typescript
+import { AuthStackParamList, AppStackParamList } from '../types';
+```
+
+### En navegación
+```typescript
+import { AppStackParamList } from '../types';
+
+const Stack = createStackNavigator<AppStackParamList>();
+```
+
+### Para componentes de pantalla
+```typescript
+import { RouteProp } from '@react-navigation/native';
+import { AuthStackParamList } from '../types';
+
+type LoginScreenProps = {
+  route: RouteProp<AuthStackParamList, 'Login'>;
+};
+```
+
+## 📋 Futuras extensiones
+
+### Para agregar nuevas pantallas:
+```typescript
+// En navigation.ts
+export type AppStackParamList = {
+  Dashboard: undefined;
+  Profile: undefined;           // ← Nueva pantalla
+  Settings: undefined;          // ← Nueva pantalla
+  Transactions: { userId: string }; // ← Con parámetros
+};
+```
+
+### Para tipos de usuario:
+```typescript
+// Futuro: user.ts
 export interface User {
   id: string;
   name: string;
   email: string;
   avatar?: string;
-  createdAt: Date;
 }
 ```
 
-### API Types
+### Para tipos de API:
 ```typescript
-// api.ts
+// Futuro: api.ts
 export interface ApiResponse<T> {
   success: boolean;
   data: T;
   message?: string;
-  error?: string;
 }
 ```
 
-### Environment Types
-```typescript
-// env.d.ts
-declare module '@env' {
-  export const API_BASE_URL: string;
-  export const GOOGLE_WEB_CLIENT_ID: string;
-}
-```
+## ✅ Beneficios de esta organización
 
-## Usage
-```typescript
-import { User, ApiResponse } from '../types';
-import { API_BASE_URL } from '@env';
+- **🎯 Centralizado**: Todos los tipos en un lugar
+- **📦 Limpio**: Imports desde `../types` en lugar de rutas largas
+- **🔧 Escalable**: Fácil agregar nuevos tipos
+- **📝 Documentado**: Cada tipo está claramente definido
+- **🔒 Type Safety**: TypeScript nos protege de errores
 
-const fetchUser = async (id: string): Promise<User> => {
-  const response: ApiResponse<User> = await api.get(`${API_BASE_URL}/users/${id}`);
-  return response.data;
-};
-```
-
-## Best Practices
-- Use descriptive interface names
-- Keep types focused and single-purpose
-- Export commonly used types from index.ts
-- Use generic types for reusable patterns
-- Document complex types with comments
-- Extend types when adding new properties
-- Use union types for limited value sets
+¡Ahora tienes una estructura de tipos completamente organizada y escalable! 🚀
