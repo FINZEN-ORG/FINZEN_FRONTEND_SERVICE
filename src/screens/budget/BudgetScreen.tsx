@@ -1,98 +1,133 @@
-import React, { useState } from 'react';
-import { View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React, { useState, useCallback } from 'react';
+import { View, ActivityIndicator } from 'react-native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AppStackParamList } from '../../types/navigation';
-import { 
-  ScreenTitle,
-  AIMessage, 
-  MessageType,
-  SectionSubtitle,
-  CategoriesSection,
-  ExpensesList,
-  FloatingActionButton
+import {
+    ScreenTitle,
+    AIMessage,
+    MessageType,
+    SectionSubtitle,
+    CategoriesSection,
+    ExpensesList,
+    FloatingActionButton
 } from '../../components';
 import { globalStyles } from '../../styles';
-import { getRecentExpenses } from '../../data/expensesData';
-
-const aiMessage = {
-  type: 'emergency' as MessageType,
-  mensaje: 'Has superado tu presupuesto de ocio este mes'
-};
+import CategoryService, { CategoryDto } from '../../services/CategoryService';
+import TransactionService, { TransactionResponse } from '../../services/TransactionService';
 
 const BudgetScreen: React.FC = () => {
-  const navigation = useNavigation<StackNavigationProp<AppStackParamList>>();
-  const [showFloatingMenu, setShowFloatingMenu] = useState(false);
+    const navigation = useNavigation<StackNavigationProp<AppStackParamList>>();
+    const [showFloatingMenu, setShowFloatingMenu] = useState(false);
+    const [categories, setCategories] = useState<CategoryDto[]>([]);
+    const [expenses, setExpenses] = useState<TransactionResponse[]>([]);
+    const [loading, setLoading] = useState(true);
 
-  // Datos
-  const recentExpenses = getRecentExpenses();
+    // Recargar datos cada vez que la pantalla recibe foco
+    useFocusEffect(
+        useCallback(() => {
+            loadData();
+        }, [])
+    );
 
-  // Handlers
-  const handleCategoryPress = (categoryId: number, title: string) => {
-    console.log(`Presionaste: ${title} (ID: ${categoryId})`);
-  };
+    const loadData = async () => {
+        try {
+            setLoading(true);
+            const [categoriesData, transactionsData] = await Promise.all([
+                CategoryService.getAllCategories(),
+                TransactionService.getAllTransactions()
+            ]);
 
-  const handleExpensePress = (expenseId: number, description: string) => {
-    console.log(`Presionaste gasto: ${description} (ID: ${expenseId})`);
-  };
+            setCategories(categoriesData);
 
-  const toggleFloatingMenu = () => {
-    setShowFloatingMenu(!showFloatingMenu);
-  };
+            // Filtrar solo gastos
+            const expensesData = transactionsData.filter(t => t.type === 'EXPENSE');
+            setExpenses(expensesData);
 
-  const handleAddExpense = () => {
-    setShowFloatingMenu(false);
-    navigation.navigate('AddExpense');
-  };
+            console.log('✅ Budget screen data loaded');
+        } catch (error) {
+            console.error('❌ Error loading budget data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  const handleAddIncome = () => {
-    setShowFloatingMenu(false);
-    navigation.navigate('AddIncome');
-  };
+    const handleCategoryPress = (categoryId: number, title: string) => {
+        console.log(`Presionaste: ${title} (ID: ${categoryId})`);
+    };
 
-  const handleCreateCategory = () => {
-  setShowFloatingMenu(false);
-  navigation.navigate('NewCategory');
-  };
+    const handleExpensePress = (expenseId: number, description: string) => {
+        console.log(`Presionaste gasto: ${description} (ID: ${expenseId})`);
+    };
 
-  return (
-    <View style={globalStyles.screenContainer}>
-      <ScreenTitle 
-        title="Presupuesto" 
-        subtitle="Un plan sencillo para lograr grandes metas" 
-      />
+    const toggleFloatingMenu = () => {
+        setShowFloatingMenu(!showFloatingMenu);
+    };
 
-      <AIMessage 
-        type={aiMessage.type}
-        mensaje={aiMessage.mensaje}
-      />
+    const handleAddExpense = () => {
+        setShowFloatingMenu(false);
+        navigation.navigate('AddExpense');
+    };
 
-      <SectionSubtitle 
-        text="Categorías de Gastos"
-        marginTop={true}
-      />
+    const handleAddIncome = () => {
+        setShowFloatingMenu(false);
+        navigation.navigate('AddIncome');
+    };
 
-      <CategoriesSection onCategoryPress={handleCategoryPress} />
+    const handleCreateCategory = () => {
+        setShowFloatingMenu(false);
+        navigation.navigate('NewCategory');
+    };
 
-      <SectionSubtitle 
-        text="Gastos"
-        marginTop={true}
-      />
+    if (loading) {
+        return (
+            <View style={[globalStyles.screenContainer, { justifyContent: 'center', alignItems: 'center' }]}>
+                <ActivityIndicator size="large" color="#6C5CE7" />
+            </View>
+        );
+    }
 
-      <ExpensesList 
-        expenses={recentExpenses}
-        onExpensePress={handleExpensePress}
-      />
+    return (
+        <View style={globalStyles.screenContainer}>
+            <ScreenTitle
+                title="Presupuesto"
+                subtitle="Un plan sencillo para lograr grandes metas"
+            />
 
-      <FloatingActionButton
-        isMenuOpen={showFloatingMenu}
-        onToggleMenu={toggleFloatingMenu}
-        onCreateCategory={handleCreateCategory}
-        onAddExpense={handleAddExpense}
-        onAddIncome={handleAddIncome}
-      />
-    </View>
-  );
+            {expenses.length > 0 && (
+                <AIMessage
+                    type="info" as MessageType
+                    mensaje={`Has registrado ${expenses.length} gastos este mes`}
+                />
+            )}
+
+            <SectionSubtitle
+                text="Categorías de Gastos"
+                marginTop={true}
+            />
+            <CategoriesSection
+                categories={categories}
+                onCategoryPress={handleCategoryPress}
+            />
+
+            <SectionSubtitle
+                text="Gastos Recientes"
+                marginTop={true}
+            />
+            <ExpensesList
+                expenses={expenses}
+                onExpensePress={handleExpensePress}
+            />
+
+            <FloatingActionButton
+                isMenuOpen={showFloatingMenu}
+                onToggleMenu={toggleFloatingMenu}
+                onCreateCategory={handleCreateCategory}
+                onAddExpense={handleAddExpense}
+                onAddIncome={handleAddIncome}
+            />
+        </View>
+    );
 };
 
 export default BudgetScreen;

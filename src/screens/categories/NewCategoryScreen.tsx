@@ -12,6 +12,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AppStackParamList } from '../../types/navigation';
 import { styles } from './NewCategoryScreen.Style';
+import CategoryService from '../../services/CategoryService';
 
 type NavProp = StackNavigationProp<AppStackParamList, 'NewCategory'>;
 
@@ -27,23 +28,32 @@ const NewCategoryScreen: React.FC = () => {
   const [budget, setBudget] = useState('');
   const [importance, setImportance] = useState<'Alta' | 'Media' | 'Baja' | null>(null);
 
-  const handleCreate = () => {
+const handleCreate = async () => {
     if (!name.trim()) {
-      Alert.alert('Nombre requerido', 'Por favor ingresa el nombre de la categoría.');
-      return;
+        Alert.alert('Nombre requerido', 'Por favor ingresa el nombre de la categoría.');
+        return;
     }
 
-    const payload = {
-      name: name.trim(),
-      description: description.trim(),
-      color: selectedColor,
-      budget: budget ? Number(budget.replace(/[^0-9.-]+/g, '')) : 0,
-      importance
-    };
+    try {
+        const payload = {
+            name: name.trim()
+        };
 
-    console.log('Crear categoría:', payload);
-    navigation.goBack();
-  };
+        console.log('📤 Crear categoría:', payload);
+
+        // ✅ Llamar al servicio del backend
+        const response = await CategoryService.createCategory(payload);
+
+        console.log('✅ Categoría creada:', response);
+
+        Alert.alert('✅ ¡Éxito!', 'La categoría ha sido creada correctamente.', [
+            { text: 'OK', onPress: () => navigation.goBack() }
+        ]);
+    } catch (error: any) {
+        console.error('❌ Error al crear categoría:', error);
+        Alert.alert('Error', error.response?.data?.message || 'No se pudo crear la categoría.');
+    }
+};
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
