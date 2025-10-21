@@ -4,7 +4,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  SafeAreaView,
   Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -95,7 +94,7 @@ const AddExpenseScreen: React.FC = () => {
   };
 
   return (
-      <SafeAreaView style={globalStyles.screenContainer}>
+      <View style={globalStyles.screenContainer}>
         <HeaderWithBack title="Añadir Gasto" onBackPress={() => navigation.goBack()} />
         <View style={addExpenseStyles.container}>
           {/* Monto */}
@@ -155,7 +154,7 @@ const AddExpenseScreen: React.FC = () => {
             <Text style={addExpenseStyles.cancelButtonText}>Cancelar</Text>
           </TouchableOpacity>
         </View>
-      </SafeAreaView>
+      </View>
   );
 };
 

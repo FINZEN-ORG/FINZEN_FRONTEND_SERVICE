@@ -4,7 +4,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  SafeAreaView,
   Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -96,7 +95,7 @@ const AddIncomeScreen: React.FC = () => {
   };
 
   return (
-      <SafeAreaView style={globalStyles.screenContainer}>
+      <View style={globalStyles.screenContainer}>
         <HeaderWithBack title="Añadir Ingreso" onBackPress={() => navigation.goBack()} />
         <View style={addExpenseStyles.container}>
           <View style={addExpenseStyles.section}>
@@ -152,7 +151,7 @@ const AddIncomeScreen: React.FC = () => {
             <Text style={addExpenseStyles.cancelButtonText}>Cancelar</Text>
           </TouchableOpacity>
         </View>
-      </SafeAreaView>
+      </View>
   );
 };
 

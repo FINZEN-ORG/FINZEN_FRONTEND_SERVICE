@@ -1,98 +1,188 @@
-import React, { useState } from 'react';
-import { View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React, { useState, useCallback } from 'react';
+import { View, ActivityIndicator } from 'react-native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AppStackParamList } from '../../types/navigation';
-import { 
-  ScreenTitle,
-  AIMessage, 
-  MessageType,
-  SectionSubtitle,
-  CategoriesSection,
-  ExpensesList,
-  FloatingActionButton
+import {
+    ScreenTitle,
+    SectionSubtitle,
+    CategoriesSection,
+    ExpensesList,
+    FloatingActionButton
 } from '../../components';
+import AIMessage, { MessageType } from '../../components/AIMessage';
 import { globalStyles } from '../../styles';
-import { getRecentExpenses } from '../../data/expensesData';
+import CategoryService, { CategoryDto } from '../../services/CategoryService';
+import TransactionService, { TransactionResponse } from '../../services/TransactionService';
 
-const aiMessage = {
-  type: 'emergency' as MessageType,
-  mensaje: 'Has superado tu presupuesto de ocio este mes'
+// ✅ Mapeo de categorías a emojis
+const CATEGORY_EMOJIS: { [key: string]: string } = {
+    'Food': '🍔',
+    'Transport': '⛽',
+    'Entertainment': '🎬',
+    'Health': '🏥',
+    'Housing': '🏠',
+    'Salary': '💼',
+    'Other': '📦',
+    // Nombres en español (por si cambian)
+    'Comida': '🍔',
+    'Transporte': '⛽',
+    'Entretenimiento': '🎬',
+    'Salud': '🏥',
+    'Vivienda': '🏠',
+    'Salario': '💼',
+    'Otro': '📦',
+    'Educación': '📚',
+    'Servicios y Facturas': '💡',
+    'Ropa y Accesorios': '👕',
+    'Compras': '🛒',
+    'Inversiones': '📈',
+    'Regalos': '🎁',
+    'Reembolsos': '💰',
+    'Ventas': '🛍️',
+    'Alquiler': '🏠',
+    'Freelance': '🧾',
+    'Otros': '📜',
 };
 
 const BudgetScreen: React.FC = () => {
-  const navigation = useNavigation<StackNavigationProp<AppStackParamList>>();
-  const [showFloatingMenu, setShowFloatingMenu] = useState(false);
+    const navigation = useNavigation<StackNavigationProp<AppStackParamList>>();
+    const [showFloatingMenu, setShowFloatingMenu] = useState(false);
+    const [categories, setCategories] = useState<CategoryDto[]>([]);
+    const [expenses, setExpenses] = useState<TransactionResponse[]>([]);
+    const [loading, setLoading] = useState(true);
 
-  // Datos
-  const recentExpenses = getRecentExpenses();
+    useFocusEffect(
+        useCallback(() => {
+            loadData();
+        }, [])
+    );
 
-  // Handlers
-  const handleCategoryPress = (categoryId: number, title: string) => {
-    console.log(`Presionaste: ${title} (ID: ${categoryId})`);
-  };
+    const loadData = async () => {
+        try {
+            setLoading(true);
+            const [categoriesData, transactionsData] = await Promise.all([
+                CategoryService.getAllCategories(),
+                TransactionService.getAllTransactions()
+            ]);
 
-  const handleExpensePress = (expenseId: number, description: string) => {
-    console.log(`Presionaste gasto: ${description} (ID: ${expenseId})`);
-  };
+            setCategories(categoriesData);
 
-  const toggleFloatingMenu = () => {
-    setShowFloatingMenu(!showFloatingMenu);
-  };
+            // Filtrar solo gastos
+            const expensesData = transactionsData.filter(t => t.type === 'EXPENSE');
+            setExpenses(expensesData);
 
-  const handleAddExpense = () => {
-    setShowFloatingMenu(false);
-    navigation.navigate('AddExpense');
-  };
+            console.log('✅ Budget screen data loaded');
+        } catch (error) {
+            console.error('❌ Error loading budget data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  const handleAddIncome = () => {
-    setShowFloatingMenu(false);
-    navigation.navigate('AddIncome');
-  };
+    // ✅ Función para convertir CategoryDto al formato esperado por CategoriesSection
+    const mapCategoriesToDisplay = () => {
+        return categories.map(cat => ({
+            id: cat.id,
+            logo: CATEGORY_EMOJIS[cat.name] || '📦', // Emoji por defecto si no existe
+            title: cat.name
+        }));
+    };
 
-  const handleCreateCategory = () => {
-  setShowFloatingMenu(false);
-  navigation.navigate('NewCategory');
-  };
+    // ✅ Función para convertir TransactionResponse al formato esperado por ExpensesList
+    const mapExpensesToDisplay = () => {
+        return expenses.map(expense => {
+            // Buscar la categoría correspondiente
+            const category = categories.find(c => c.id === expense.categoryId);
+            const categoryName = category?.name || 'Other';
 
-  return (
-    <View style={globalStyles.screenContainer}>
-      <ScreenTitle 
-        title="Presupuesto" 
-        subtitle="Un plan sencillo para lograr grandes metas" 
-      />
+            return {
+                id: expense.id,
+                categoryIcon: CATEGORY_EMOJIS[categoryName] || '📦',
+                description: expense.description,
+                amount: expense.amount,
+                date: new Date(expense.date).toISOString().split('T')[0], // Formato YYYY-MM-DD
+                category: categoryName.toLowerCase()
+            };
+        });
+    };
 
-      <AIMessage 
-        type={aiMessage.type}
-        mensaje={aiMessage.mensaje}
-      />
+    const handleCategoryPress = (categoryId: number, title: string) => {
+        console.log(`Presionaste: ${title} (ID: ${categoryId})`);
+    };
 
-      <SectionSubtitle 
-        text="Categorías de Gastos"
-        marginTop={true}
-      />
+    const handleExpensePress = (expenseId: number, description: string) => {
+        console.log(`Presionaste gasto: ${description} (ID: ${expenseId})`);
+    };
 
-      <CategoriesSection onCategoryPress={handleCategoryPress} />
+    const toggleFloatingMenu = () => {
+        setShowFloatingMenu(!showFloatingMenu);
+    };
 
-      <SectionSubtitle 
-        text="Gastos"
-        marginTop={true}
-      />
+    const handleAddExpense = () => {
+        setShowFloatingMenu(false);
+        navigation.navigate('AddExpense');
+    };
 
-      <ExpensesList 
-        expenses={recentExpenses}
-        onExpensePress={handleExpensePress}
-      />
+    const handleAddIncome = () => {
+        setShowFloatingMenu(false);
+        navigation.navigate('AddIncome');
+    };
 
-      <FloatingActionButton
-        isMenuOpen={showFloatingMenu}
-        onToggleMenu={toggleFloatingMenu}
-        onCreateCategory={handleCreateCategory}
-        onAddExpense={handleAddExpense}
-        onAddIncome={handleAddIncome}
-      />
-    </View>
-  );
+    const handleCreateCategory = () => {
+        setShowFloatingMenu(false);
+        navigation.navigate('NewCategory');
+    };
+
+    if (loading) {
+        return (
+            <View style={[globalStyles.screenContainer, { justifyContent: 'center', alignItems: 'center' }]}>
+                <ActivityIndicator size="large" color="#6C5CE7" />
+            </View>
+        );
+    }
+
+    return (
+        <View style={globalStyles.screenContainer}>
+            <ScreenTitle
+                title="Presupuesto"
+                subtitle="Un plan sencillo para lograr grandes metas"
+            />
+
+            {expenses.length > 0 && (
+                <AIMessage
+                    type={'info' as MessageType}
+                    mensaje={`Has registrado ${expenses.length} gastos este mes`}
+                />
+            )}
+
+            <SectionSubtitle
+                text="Categorías de Gastos"
+                marginTop={true}
+            />
+            <CategoriesSection
+                categories={mapCategoriesToDisplay()} // ✅ Convertir al formato esperado
+                onCategoryPress={handleCategoryPress}
+            />
+
+            <SectionSubtitle
+                text="Gastos Recientes"
+                marginTop={true}
+            />
+            <ExpensesList
+                expenses={mapExpensesToDisplay()} // ✅ Convertir al formato esperado
+                onExpensePress={handleExpensePress}
+            />
+
+            <FloatingActionButton
+                isMenuOpen={showFloatingMenu}
+                onToggleMenu={toggleFloatingMenu}
+                onCreateCategory={handleCreateCategory}
+                onAddExpense={handleAddExpense}
+                onAddIncome={handleAddIncome}
+            />
+        </View>
+    );
 };
 
 export default BudgetScreen;
