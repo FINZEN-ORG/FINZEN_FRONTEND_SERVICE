@@ -140,7 +140,7 @@ class AuthService {
         console.log("Warning: Could not sign out from Google");
       }
       
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error during logout:", error);
       // Even if Google signout fails, remove the token
       await AsyncStorage.removeItem("jwt");

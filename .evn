@@ -1,0 +1,4 @@
+USERS_API_BASE_URL=http://localhost:8080/api
+TRANSACTIONS_API_BASE_URL=http://localhost:8082/api
+GOALS_API_BASE_URL=http://localhost:8083/api
+GOOGLE_WEB_CLIENT_ID=436116978721-9ch9qg5j8o62mj6v4aqtqlgccmir8e2g.apps.googleusercontent.com

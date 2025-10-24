@@ -4,6 +4,13 @@ import { AuthStackParamList } from "../types";
 
 import LoginScreen from "../screens/auth/LoginScreen";
 
+let OnboardingStack: any;
+try {
+  OnboardingStack = require('./OnboardingStack').default;
+} catch (e) {
+  OnboardingStack = undefined;
+}
+
 const Stack = createStackNavigator<AuthStackParamList>();
 
 export default function AuthStack() {
@@ -16,6 +23,7 @@ export default function AuthStack() {
       }}
     >
       <Stack.Screen name="Login" component={LoginScreen} />
+      {OnboardingStack && <Stack.Screen name="Onboarding" component={OnboardingStack} />}
     </Stack.Navigator>
   );
 }
