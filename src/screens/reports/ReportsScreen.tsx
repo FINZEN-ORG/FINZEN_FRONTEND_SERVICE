@@ -1,45 +1,11 @@
-import React, { useState, useCallback } from 'react';
+import React from 'react';
 import { View, Text, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
-import { reportsStyles } from './ReportsScreen.Style';
 import { globalStyles } from '../../styles';
-import TransactionService from '../../services/TransactionService';
 import { ScreenTitle } from '../../components';
+import useReports from './useReports';
 
 const ReportsScreen: React.FC = () => {
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [totalIncome, setTotalIncome] = useState(0);
-  const [totalExpense, setTotalExpense] = useState(0);
-
-  useFocusEffect(
-      useCallback(() => {
-        loadReports();
-      }, [])
-  );
-
-  const loadReports = async () => {
-    try {
-      setLoading(true);
-      const reports = await TransactionService.getReports();
-      setTotalIncome(reports.totalIncome);
-      setTotalExpense(reports.totalExpense);
-      console.log('✅ Reports loaded:', reports);
-    } catch (error) {
-      console.error('❌ Error loading reports:', error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-
-  const onRefresh = () => {
-    setRefreshing(true);
-    loadReports();
-  };
-
-  const balance = totalIncome - totalExpense;
-  const savingsRate = totalIncome > 0 ? ((balance / totalIncome) * 100).toFixed(1) : 0;
+  const { loading, refreshing, totalIncome, totalExpense, onRefresh, balance, savingsRate } = useReports();
 
   if (loading) {
     return (

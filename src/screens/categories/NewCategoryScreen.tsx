@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -6,54 +6,29 @@ import {
   TouchableOpacity,
   Pressable,
   ScrollView,
-  Alert
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { AppStackParamList } from '../../types/navigation';
 import { styles } from './NewCategoryScreen.Style';
-import CategoryService from '../../services/CategoryService';
-
-type NavProp = StackNavigationProp<AppStackParamList, 'NewCategory'>;
+import useNewCategory from './useNewCategory';
 
 const COLORS = [
   '#F7C777', '#F3A76B', '#FFD3A5', '#9FE6C9', '#7FD3D3', '#CDEAF0'
 ];
 
 const NewCategoryScreen: React.FC = () => {
-  const navigation = useNavigation<NavProp>();
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [selectedColor, setSelectedColor] = useState<string | null>(null);
-  const [budget, setBudget] = useState('');
-  const [importance, setImportance] = useState<'Alta' | 'Media' | 'Baja' | null>(null);
-
-const handleCreate = async () => {
-    if (!name.trim()) {
-        Alert.alert('Nombre requerido', 'Por favor ingresa el nombre de la categoría.');
-        return;
-    }
-
-    try {
-        const payload = {
-            name: name.trim()
-        };
-
-        console.log('📤 Crear categoría:', payload);
-
-        // ✅ Llamar al servicio del backend
-        const response = await CategoryService.createCategory(payload);
-
-        console.log('✅ Categoría creada:', response);
-
-        Alert.alert('✅ ¡Éxito!', 'La categoría ha sido creada correctamente.', [
-            { text: 'OK', onPress: () => navigation.goBack() }
-        ]);
-    } catch (error: any) {
-        console.error('❌ Error al crear categoría:', error);
-        Alert.alert('Error', error.response?.data?.message || 'No se pudo crear la categoría.');
-    }
-};
+  const {
+    name,
+    setName,
+    description,
+    setDescription,
+    selectedColor,
+    setSelectedColor,
+    budget,
+    setBudget,
+    importance,
+    setImportance,
+    handleCreate,
+    handleCancel,
+  } = useNewCategory();
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -134,7 +109,7 @@ const handleCreate = async () => {
         <Text style={styles.primaryBtnText}>Crear Categoría</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.secondaryBtn} onPress={() => navigation.goBack()}>
+      <TouchableOpacity style={styles.secondaryBtn} onPress={() => handleCancel()}>
         <Text style={styles.secondaryBtnText}>Cancelar</Text>
       </TouchableOpacity>
     </ScrollView>

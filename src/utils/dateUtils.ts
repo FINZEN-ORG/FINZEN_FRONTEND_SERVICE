@@ -11,7 +11,6 @@ export const convertToISODate = (dateString: string): string => {
       const parsedDate = new Date(dateString);
       return parsedDate.toISOString();
     } catch (error) {
-      console.error('Error parsing date:', error);
       return new Date().toISOString();
     }
   };

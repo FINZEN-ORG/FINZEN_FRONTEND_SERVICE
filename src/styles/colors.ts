@@ -18,7 +18,7 @@ export const colors = {
   primaryDarker: '#00481c',
 
   background: '#eafff2',
-  backgroundSecondary: '#A9F8C4',
+  backgroundSecondary: '#e9efe9ff',
   surface: '#FFFFFF',
 
   // Text colors (permitidos adicionalmente: negro y blanco)

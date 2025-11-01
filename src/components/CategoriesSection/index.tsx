@@ -6,6 +6,8 @@ import { categories } from '../../data/categories';
 
 const { width } = Dimensions.get('window');
 
+type DisplayCategory = typeof categories[number];
+
 interface CategoriesSectionProps {
   onCategoryPress: (categoryId: number, title: string) => void;
   selectedCategory?: number | null; 
@@ -32,7 +34,7 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
   const categoryData = dynamicCategories || categories; 
   const categoryBlocks = groupCategoriesInBlocks(categoryData);
 
-  const renderCategoryBlock = ({ item: block }: { item: typeof categories }) => (
+  const renderCategoryBlock = ({ item: block }: { item: DisplayCategory[] }) => (
     <View style={budgetStyles.blockContainer}>
       {block.map((category) => (
         <View key={category.id} style={budgetStyles.categoryWrapper}>
@@ -49,13 +51,15 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
 
   const sectionStyle = containerStyle || budgetStyles.categoriesSection;
   const snapInterval = selectionMode ? width - 40 : budgetStyles.blockContainer.width + 20;
-
   return (
     <View style={sectionStyle}>
       <FlatList
         data={categoryBlocks}
         renderItem={renderCategoryBlock}
-        keyExtractor={(item, index) => index.toString()}
+        // use a stable key per block composed of the category ids
+        keyExtractor={(item: typeof categories, index) =>
+          Array.isArray(item) ? item.map(c => c.id).join('-') : index.toString()
+        }
         horizontal={true}
         showsHorizontalScrollIndicator={false}
         pagingEnabled={true}

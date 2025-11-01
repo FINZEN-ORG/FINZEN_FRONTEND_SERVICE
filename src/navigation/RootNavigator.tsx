@@ -15,7 +15,6 @@ export default function RootNavigator() {
     return (
       <SplashScreen
         onFinish={() => {
-          console.log("SplashScreen animation finished");
           setShowSplash(false);
         }}
       />
