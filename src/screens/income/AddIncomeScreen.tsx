@@ -8,10 +8,10 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { CategoriesSection, DatePicker, HeaderWithBack } from '../../components';
-import { addExpenseStyles } from '../expenses/AddExpenseScreen.Style';
 import { globalStyles } from '../../styles';
 import { incomeCategories } from '../../data/incomeCategories';
 import TransactionService from '../../services/TransactionService';
+import { form } from '../../styles/form';
 
 const AddIncomeScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -97,11 +97,11 @@ const AddIncomeScreen: React.FC = () => {
   return (
       <View style={globalStyles.screenContainer}>
         <HeaderWithBack title="Añadir Ingreso" onBackPress={() => navigation.goBack()} />
-        <View style={addExpenseStyles.container}>
-          <View style={addExpenseStyles.section}>
-            <Text style={addExpenseStyles.label}>Monto del ingreso</Text>
+        <View style={form.container}>
+          <View style={form.section}>
+            <Text style={form.label}>Monto del ingreso</Text>
             <TextInput
-                style={addExpenseStyles.amountInput}
+                style={form.input}
                 value={amount}
                 onChangeText={formatAmount}
                 placeholder="$ 0.00"
@@ -110,10 +110,10 @@ const AddIncomeScreen: React.FC = () => {
             />
           </View>
 
-          <View style={addExpenseStyles.section}>
-            <Text style={addExpenseStyles.label}>Descripción:</Text>
+          <View style={form.section}>
+            <Text style={form.label}>Descripción:</Text>
             <TextInput
-                style={addExpenseStyles.descriptionInput}
+                style={form.input}
                 value={description}
                 onChangeText={setDescription}
                 placeholder="Ej: Pago extra"
@@ -121,19 +121,19 @@ const AddIncomeScreen: React.FC = () => {
             />
           </View>
 
-          <View style={addExpenseStyles.section}>
-            <Text style={addExpenseStyles.label}>Categorías:</Text>
+          <View style={form.section}>
+            <Text style={form.label}>Categorías:</Text>
             <CategoriesSection
                 categories={incomeCategories}
                 onCategoryPress={handleCategorySelect}
                 selectedCategory={selectedCategory}
                 selectionMode={true}
-                containerStyle={addExpenseStyles.categoriesSection}
+                containerStyle={form.categoriesSection}
             />
           </View>
 
-          <View style={addExpenseStyles.section}>
-            <Text style={addExpenseStyles.label}>Fecha</Text>
+          <View style={form.section}>
+            <Text style={form.label}>Fecha</Text>
             <DatePicker
                 value={date}
                 onDateChange={setDate}
@@ -143,12 +143,12 @@ const AddIncomeScreen: React.FC = () => {
           </View>
         </View>
 
-        <View style={addExpenseStyles.buttonsContainer}>
-          <TouchableOpacity style={addExpenseStyles.confirmButton} onPress={handleConfirm}>
-            <Text style={addExpenseStyles.confirmButtonText}>Confirmar</Text>
+        <View style={form.buttonsContainer}>
+          <TouchableOpacity style={form.confirmButton} onPress={handleConfirm}>
+            <Text style={form.confirmButtonText}>Confirmar</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={addExpenseStyles.cancelButton} onPress={handleCancel}>
-            <Text style={addExpenseStyles.cancelButtonText}>Cancelar</Text>
+          <TouchableOpacity style={form.cancelButton} onPress={handleCancel}>
+            <Text style={form.cancelButtonText}>Cancelar</Text>
           </TouchableOpacity>
         </View>
       </View>

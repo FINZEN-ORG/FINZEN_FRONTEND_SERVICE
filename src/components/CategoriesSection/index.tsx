@@ -8,10 +8,10 @@ const { width } = Dimensions.get('window');
 
 interface CategoriesSectionProps {
   onCategoryPress: (categoryId: number, title: string) => void;
-  selectedCategory?: number | null; // Para modo selección
-  selectionMode?: boolean; // Opcional: para diferentes estilos según el contexto
-  containerStyle?: any; // Para permitir estilos personalizados
-  categories?: typeof categories; // Nueva propiedad para pasar categorías dinámicas
+  selectedCategory?: number | null; 
+  selectionMode?: boolean; 
+  containerStyle?: any; 
+  categories?: typeof categories; 
 }
 
 export const CategoriesSection: React.FC<CategoriesSectionProps> = ({ 
@@ -19,7 +19,7 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
   selectedCategory = null,
   selectionMode = false,
   containerStyle,
-  categories: dynamicCategories // Usar categorías dinámicas si se proporcionan
+  categories: dynamicCategories 
 }) => {
   const groupCategoriesInBlocks = (data: typeof categories) => {
     const blocks = [];
@@ -29,7 +29,7 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
     return blocks;
   };
 
-  const categoryData = dynamicCategories || categories; // Usar categorías dinámicas o predeterminadas
+  const categoryData = dynamicCategories || categories; 
   const categoryBlocks = groupCategoriesInBlocks(categoryData);
 
   const renderCategoryBlock = ({ item: block }: { item: typeof categories }) => (
@@ -47,7 +47,6 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
     </View>
   );
 
-  // Usar estilos personalizados si se proporcionan, sino usar los por defecto
   const sectionStyle = containerStyle || budgetStyles.categoriesSection;
   const snapInterval = selectionMode ? width - 40 : budgetStyles.blockContainer.width + 20;
 
