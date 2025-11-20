@@ -1,6 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { View, ActivityIndicator } from 'react-native';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AppStackParamList } from '../../types/navigation';
 import {
@@ -12,100 +12,16 @@ import {
 } from '../../components';
 import AIMessage, { MessageType } from '../../components/AIMessage';
 import { globalStyles } from '../../styles';
-import CategoryService, { CategoryDto } from '../../services/CategoryService';
-import TransactionService, { TransactionResponse } from '../../services/TransactionService';
+import useBudget from './useBudget';
 
-// ✅ Mapeo de categorías a emojis
-const CATEGORY_EMOJIS: { [key: string]: string } = {
-    'Food': '🍔',
-    'Transport': '⛽',
-    'Entertainment': '🎬',
-    'Health': '🏥',
-    'Housing': '🏠',
-    'Salary': '💼',
-    'Other': '📦',
-    // Nombres en español (por si cambian)
-    'Comida': '🍔',
-    'Transporte': '⛽',
-    'Entretenimiento': '🎬',
-    'Salud': '🏥',
-    'Vivienda': '🏠',
-    'Salario': '💼',
-    'Otro': '📦',
-    'Educación': '📚',
-    'Servicios y Facturas': '💡',
-    'Ropa y Accesorios': '👕',
-    'Compras': '🛒',
-    'Inversiones': '📈',
-    'Regalos': '🎁',
-    'Reembolsos': '💰',
-    'Ventas': '🛍️',
-    'Alquiler': '🏠',
-    'Freelance': '🧾',
-    'Otros': '📜',
-};
+// emoji map moved into useBudget
 
 const BudgetScreen: React.FC = () => {
     const navigation = useNavigation<StackNavigationProp<AppStackParamList>>();
     const [showFloatingMenu, setShowFloatingMenu] = useState(false);
-    const [categories, setCategories] = useState<CategoryDto[]>([]);
-    const [expenses, setExpenses] = useState<TransactionResponse[]>([]);
-    const [loading, setLoading] = useState(true);
 
-    useFocusEffect(
-        useCallback(() => {
-            loadData();
-        }, [])
-    );
-
-    const loadData = async () => {
-        try {
-            setLoading(true);
-            const [categoriesData, transactionsData] = await Promise.all([
-                CategoryService.getAllCategories(),
-                TransactionService.getAllTransactions()
-            ]);
-
-            setCategories(categoriesData);
-
-            // Filtrar solo gastos
-            const expensesData = transactionsData.filter(t => t.type === 'EXPENSE');
-            setExpenses(expensesData);
-
-            console.log('✅ Budget screen data loaded');
-        } catch (error) {
-            console.error('❌ Error loading budget data:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // ✅ Función para convertir CategoryDto al formato esperado por CategoriesSection
-    const mapCategoriesToDisplay = () => {
-        return categories.map(cat => ({
-            id: cat.id,
-            logo: CATEGORY_EMOJIS[cat.name] || '📦', // Emoji por defecto si no existe
-            title: cat.name
-        }));
-    };
-
-    // ✅ Función para convertir TransactionResponse al formato esperado por ExpensesList
-    const mapExpensesToDisplay = () => {
-        return expenses.map(expense => {
-            // Buscar la categoría correspondiente
-            const category = categories.find(c => c.id === expense.categoryId);
-            const categoryName = category?.name || 'Other';
-
-            return {
-                id: expense.id,
-                categoryIcon: CATEGORY_EMOJIS[categoryName] || '📦',
-                description: expense.description,
-                amount: expense.amount,
-                date: new Date(expense.date).toISOString().split('T')[0], // Formato YYYY-MM-DD
-                category: categoryName.toLowerCase()
-            };
-        });
-    };
+    // Data + logic extracted to useBudget
+    const { loading, mapCategoriesToDisplay, mapExpensesToDisplay, expenses } = useBudget();
 
     const handleCategoryPress = (categoryId: number, title: string) => {
         console.log(`Presionaste: ${title} (ID: ${categoryId})`);

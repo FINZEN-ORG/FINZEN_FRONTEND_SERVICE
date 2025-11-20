@@ -21,8 +21,7 @@ class BudgetService {
     // GET /api/budgets - Obtener todos los presupuestos
     static async getAllBudgets(): Promise<BudgetDto[]> {
         const headers = await this.getAuthHeader();
-        const url = `${TRANSACTIONS_API_BASE_URL}/budgets`;
-        console.log('📥 Fetching budgets from:', url);
+    const url = `${TRANSACTIONS_API_BASE_URL}/budgets`;
         const response = await axios.get(url, { headers });
         return response.data;
     }
@@ -30,8 +29,7 @@ class BudgetService {
     // POST /api/budgets - Crear o actualizar presupuesto
     static async createOrUpdateBudget(data: BudgetDto): Promise<BudgetDto> {
         const headers = await this.getAuthHeader();
-        const url = `${TRANSACTIONS_API_BASE_URL}/budgets`;
-        console.log('📤 Creating/updating budget:', data);
+    const url = `${TRANSACTIONS_API_BASE_URL}/budgets`;
         const response = await axios.post(url, data, { headers });
         return response.data;
     }

@@ -3,10 +3,10 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { styles } from './CategoryCard.styles';
 
 export interface CategoryCardProps {
-  logo: string; // Emoji o texto del logo
+  logo: string;
   title: string;
   onPress?: () => void;
-  isSelected?: boolean; // Para mostrar estado seleccionado
+  isSelected?: boolean;
 }
 
 export const CategoryCard: React.FC<CategoryCardProps> = ({

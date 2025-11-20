@@ -6,12 +6,14 @@ import { categories } from '../../data/categories';
 
 const { width } = Dimensions.get('window');
 
+type DisplayCategory = typeof categories[number];
+
 interface CategoriesSectionProps {
   onCategoryPress: (categoryId: number, title: string) => void;
-  selectedCategory?: number | null; // Para modo selección
-  selectionMode?: boolean; // Opcional: para diferentes estilos según el contexto
-  containerStyle?: any; // Para permitir estilos personalizados
-  categories?: typeof categories; // Nueva propiedad para pasar categorías dinámicas
+  selectedCategory?: number | null; 
+  selectionMode?: boolean; 
+  containerStyle?: any; 
+  categories?: typeof categories; 
 }
 
 export const CategoriesSection: React.FC<CategoriesSectionProps> = ({ 
@@ -19,7 +21,7 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
   selectedCategory = null,
   selectionMode = false,
   containerStyle,
-  categories: dynamicCategories // Usar categorías dinámicas si se proporcionan
+  categories: dynamicCategories 
 }) => {
   const groupCategoriesInBlocks = (data: typeof categories) => {
     const blocks = [];
@@ -29,10 +31,10 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
     return blocks;
   };
 
-  const categoryData = dynamicCategories || categories; // Usar categorías dinámicas o predeterminadas
+  const categoryData = dynamicCategories || categories; 
   const categoryBlocks = groupCategoriesInBlocks(categoryData);
 
-  const renderCategoryBlock = ({ item: block }: { item: typeof categories }) => (
+  const renderCategoryBlock = ({ item: block }: { item: DisplayCategory[] }) => (
     <View style={budgetStyles.blockContainer}>
       {block.map((category) => (
         <View key={category.id} style={budgetStyles.categoryWrapper}>
@@ -47,16 +49,17 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
     </View>
   );
 
-  // Usar estilos personalizados si se proporcionan, sino usar los por defecto
   const sectionStyle = containerStyle || budgetStyles.categoriesSection;
   const snapInterval = selectionMode ? width - 40 : budgetStyles.blockContainer.width + 20;
-
   return (
     <View style={sectionStyle}>
       <FlatList
         data={categoryBlocks}
         renderItem={renderCategoryBlock}
-        keyExtractor={(item, index) => index.toString()}
+        // use a stable key per block composed of the category ids
+        keyExtractor={(item: typeof categories, index) =>
+          Array.isArray(item) ? item.map(c => c.id).join('-') : index.toString()
+        }
         horizontal={true}
         showsHorizontalScrollIndicator={false}
         pagingEnabled={true}

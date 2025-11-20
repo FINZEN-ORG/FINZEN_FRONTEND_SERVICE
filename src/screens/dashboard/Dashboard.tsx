@@ -1,72 +1,13 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useCallback } from 'react';
+import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
 import { dashboardStyles } from './Dashboard.Style';
-import { useAuth } from '../../context/AuthContext';
-import { useAuthActions } from '../../hooks/useAuthActions';
-import TransactionService, { TransactionResponse } from '../../services/TransactionService';
-import { useFocusEffect } from '@react-navigation/native';
+import useDashboard from './useDashboard';
 
 interface DashboardProps {}
 
 const Dashboard: React.FC<DashboardProps> = () => {
-    // ✅ TODOS LOS HOOKS AL INICIO, ANTES DE CUALQUIER CONDICIONAL
-    const { user } = useAuth();
-    const { handleLogout } = useAuthActions();
-
-    const [transactions, setTransactions] = useState<TransactionResponse[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false);
-    const [totalIncome, setTotalIncome] = useState(0);
-    const [totalExpense, setTotalExpense] = useState(0);
-
-    // ✅ useFocusEffect DEBE estar aquí, no después de condicionales
-    useFocusEffect(
-        useCallback(() => {
-            if (user) {
-                loadDashboardData();
-            }
-        }, [user])
-    );
-
-    const loadDashboardData = async () => {
-        try {
-            setLoading(true);
-
-            // Obtener transacciones
-            const transactionsData = await TransactionService.getAllTransactions();
-            setTransactions(transactionsData);
-
-            // Obtener reportes (totales)
-            const reports = await TransactionService.getReports();
-            setTotalIncome(reports.totalIncome);
-            setTotalExpense(reports.totalExpense);
-
-            console.log('✅ Dashboard data loaded:', {
-                transactions: transactionsData.length,
-                totalIncome: reports.totalIncome,
-                totalExpense: reports.totalExpense
-            });
-        } catch (error) {
-            console.error('❌ Error loading dashboard:', error);
-        } finally {
-            setLoading(false);
-            setRefreshing(false);
-        }
-    };
-
-    const onRefresh = () => {
-        setRefreshing(true);
-        loadDashboardData();
-    };
-
-    const onLogoutPress = async () => {
-        try {
-            await handleLogout();
-        } catch (error) {
-            // Error is already handled in useAuthActions
-        }
-    };
+    const { user, transactions, loading, refreshing, totalIncome, totalExpense, onRefresh, onLogoutPress } = useDashboard();
 
     // ✅ AHORA SÍ, después de todos los hooks, verificar user
     if (!user) {

@@ -60,19 +60,14 @@ class AuthService {
 
       const jwt = response.data.accessToken;
       
-      // Save JWT token
-      await AsyncStorage.setItem("jwt", jwt);
-      
-      // Log del token guardado
-      console.log('✅ JWT TOKEN GUARDADO:', jwt);
-      console.log('📅 TOKEN GUARDADO EN:', new Date().toLocaleString());
+  // Save JWT token
+  await AsyncStorage.setItem("jwt", jwt);
       
       // Get user data from backend
       const userData = await this.getCurrentUser();
       
       return userData;
     } catch (error: any) {
-      console.error("Error en Google login:", error);
       throw new Error(error.message || 'Error en el login con Google');
     }
   }
@@ -97,7 +92,6 @@ class AuthService {
 
       return response.data;
     } catch (error: any) {
-      console.error("Error getting current user:", error);
       // If token is invalid, remove it
       if (error.response?.status === 401) {
         await this.logout();
@@ -118,7 +112,6 @@ class AuthService {
       const userData = await this.getCurrentUser();
       return userData;
     } catch (error) {
-      console.log("Auth check failed, user not logged in");
       return null;
     }
   }
@@ -133,18 +126,17 @@ class AuthService {
       try {
         await GoogleSignin.revokeAccess();
       } catch (revokeError) {
-        console.log("Warning: Could not revoke Google access");
+        // ignore revoke errors
       }
       
       try {
         await GoogleSignin.signOut();
       } catch (signOutError) {
-        console.log("Warning: Could not sign out from Google");
+        // ignore signOut errors
       }
       
     } catch (error) {
-      console.error("Error during logout:", error);
-      // Even if Google signout fails, remove the token
+      // Even if logout fails, remove the token
       await AsyncStorage.removeItem("jwt");
     }
   }
