@@ -51,6 +51,8 @@ class AuthService {
         throw new Error('No se obtuvo el idToken de Google');
       }
 
+      console.log('✅ IDTOKEN:', idToken);
+
       // Send idToken to backend
       const response = await axios.post(`${USERS_API_BASE_URL}/auth/google`, {
         idToken 
