@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, ReactNode, useEffect, useRef, useCallback } from 'react';
-import { Alert } from 'react-native';
+import CompletionModal from '../components/Onboarding/CompletionModal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export type OnboardingState = {
@@ -30,11 +30,13 @@ type Action =
   | { type: 'SET_STEP'; payload: number }
   | { type: 'UPDATE_ANSWER'; payload: { key: string; value: any } }
   | { type: 'LOAD'; payload: Partial<OnboardingState> }
-  | { type: 'RESET' };
+  | { type: 'RESET' }
+  | { type: 'SET_COMPLETED'; payload: boolean }
+  | { type: 'CLEAR_COMPLETED' };
 
 const STORAGE_KEY = '@finzen_onboarding_v1';
 
-const initialState: OnboardingState = { step: 0 };
+const initialState: OnboardingState = { step: 0, completed: false };
 
 function reducer(state: OnboardingState, action: Action): OnboardingState {
   switch (action.type) {
@@ -46,6 +48,10 @@ function reducer(state: OnboardingState, action: Action): OnboardingState {
       return { ...state, ...action.payload };
     case 'RESET':
       return { ...initialState };
+    case 'SET_COMPLETED':
+      return { ...state, completed: action.payload };
+    case 'CLEAR_COMPLETED':
+      return { ...state, completed: false };
     default:
       return state;
   }
@@ -93,6 +99,8 @@ export const OnboardingProvider = ({ children }: { children: ReactNode }) => {
 
   const setStep = useCallback((s: number) => dispatch({ type: 'SET_STEP', payload: s }), [dispatch]);
   const updateAnswer = useCallback((key: string, value: any) => dispatch({ type: 'UPDATE_ANSWER', payload: { key, value } }), [dispatch]);
+  const setCompleted = useCallback((v: boolean) => dispatch({ type: 'SET_COMPLETED', payload: v }), [dispatch]);
+  const clearCompleted = useCallback(() => dispatch({ type: 'CLEAR_COMPLETED' }), [dispatch]);
 
   const reset = useCallback(async () => {
     dispatch({ type: 'RESET' });
@@ -104,19 +112,20 @@ export const OnboardingProvider = ({ children }: { children: ReactNode }) => {
   }, [dispatch]);
 
   const submit = useCallback(async () => {
-    // Not sending to backend yet - show Alert with payload
+    // Prepare payload (not sent yet) and mark onboarding as completed to show modal
     const payload: { [k: string]: any } = {};
     Object.keys(state).forEach((k) => {
       if (k === 'step') return;
       payload[k] = (state as any)[k];
     });
-    Alert.alert('Onboarding payload', JSON.stringify(payload, null, 2));
-    await reset();
-  }, [state, reset]);
+    // mark completed (will trigger UI modal)
+    setCompleted(true);
+  }, [state, setCompleted]);
 
   return (
     <OnboardingContext.Provider value={{ state, setStep, updateAnswer, submit, reset }}>
       {children}
+      <CompletionModal />
     </OnboardingContext.Provider>
   );
 };

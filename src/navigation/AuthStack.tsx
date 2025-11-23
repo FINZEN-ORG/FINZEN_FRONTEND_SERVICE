@@ -13,6 +13,7 @@ try {
 
 const Stack = createStackNavigator<AuthStackParamList>();
 
+
 export default function AuthStack() {
   return (
     <Stack.Navigator
@@ -23,7 +24,7 @@ export default function AuthStack() {
       }}
     >
       <Stack.Screen name="Login" component={LoginScreen} />
-      {OnboardingStack && <Stack.Screen name="Onboarding" component={OnboardingStack} />}
+       {OnboardingStack && <Stack.Screen name="Onboarding" component={OnboardingStack} />}
     </Stack.Navigator>
   );
 }

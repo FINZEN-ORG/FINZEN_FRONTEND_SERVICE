@@ -3,6 +3,7 @@ import { colors } from '../../styles/colors';
 
 const OnboardingStyles = StyleSheet.create({
   scroll: {
+    flex: 1,
     padding: 20,
     paddingBottom: 60, // Extend container further down
     backgroundColor: '#F5FFF5', // Softer green background
@@ -50,7 +51,7 @@ const OnboardingStyles = StyleSheet.create({
     textAlign: 'center', // Center align subtitle
   },
   label: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '700',
     marginTop: 12,
     marginBottom: 6,
@@ -72,6 +73,7 @@ const OnboardingStyles = StyleSheet.create({
   optionsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    flexWrap: 'wrap',
     marginTop: 12,
     marginBottom: 24,
   },
@@ -140,6 +142,66 @@ const OnboardingStyles = StyleSheet.create({
   continueTextDisabled: {
     color: colors.primaryDarker,
   },
+  // Styles moved from individual onboarding screens
+  topImage: {
+    width: 56,
+    height: 56,
+    marginRight: 12,
+  },
+  toneGrid: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 12, marginBottom: 18 },
+  toneTitle: { fontSize: 14 },
+  toneCardCompact: { width: '23%', minHeight: 64, paddingVertical: 10 },
+  goalList: { marginTop: 8 },
+  goalItem: {
+    backgroundColor: colors.surface,
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  goalItemSelected: {
+    borderColor: colors.primary,
+    backgroundColor: colors.backgroundLightest,
+  },
+  goalText: { color: colors.textPrimary, fontWeight: '600' },
+  goalTextSelected: { color: colors.primaryDeep },
+  confirmBox: {
+    marginTop: 16,
+    backgroundColor: colors.backgroundLight,
+    borderRadius: 12,
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  confirmEmoji: { fontSize: 22, marginRight: 10 },
+  confirmText: { color: colors.primaryDeep, fontWeight: '600' },
+  contentContainer: {
+    flex: 1,
+  },
+  footerFixed: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 28,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+  },
+  contentSpacer: {
+    height: 92,
+  },
+  processingWrapper: { justifyContent: 'center', alignItems: 'center' },
+  processingAnimation: { width: 140, height: 140 },
+  // stars rating
+  starWrapper: {
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  starRow: { flexDirection: 'row', justifyContent: 'center', gap: 8 },
+  star: { fontSize: 28, marginHorizontal: 6 },
+  starActive: { color: colors.primary },
+  starInactive: { color: '#DDD' },
 });
 
 export default OnboardingStyles;

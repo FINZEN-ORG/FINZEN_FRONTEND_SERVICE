@@ -4,118 +4,88 @@ import { useNavigation } from '@react-navigation/native';
 import { useOnboarding } from '../../context/OnboardingContext';
 import OptionCard from '../../components/OptionCard/OptionCard';
 import OnboardingStyles from './OnboardingStyles';
+import Header from '../../components/Onboarding/Header';
+import { getOnboardingForTone } from '../../data/onboardingQuestions';
 
-const TOTAL_STEPS = 7;
+ 
 
 const OnboardingFinancialSituation: React.FC = () => {
   const navigation = useNavigation();
   const { state, updateAnswer, setStep } = useOnboarding();
 
-  // Map any existing english values to the spanish tokens used in UI
-  const mapIncome = (v: any) => (v === 'weekly' ? 'semanal' : v === 'biweekly' ? 'quincenal' : v === 'monthly' ? 'mensual' : v);
-  const mapExpense = (v: any) => (v === 'always' ? 'siempre' : v === 'sometimes' ? 'aveces' : v === 'never' ? 'nunca' : v);
-  const mapSaving = (v: any) => (v === 'yes' ? 'si' : v === 'no' ? 'no' : v);
-  const mapLargest = (v: any) =>
-    v === 'housing' ? 'vivienda' : v === 'food' ? 'comida' : v === 'transportation' ? 'transporte' : v === 'debts' ? 'deudas' : v;
+  // Data-driven labels/options according to selected tone (screen3)
+  const toneKey = (state.tone as any) || 'friendly';
+  const toneConfig = getOnboardingForTone(toneKey as any);
+  const screen3 = toneConfig.screen3;
 
-  const [incomeFrequency, setIncomeFrequency] = useState<'semanal' | 'quincenal' | 'mensual' | null>(
-    mapIncome(state.incomeFrequency) || null
-  );
-  const [expenseControl, setExpenseControl] = useState<'siempre' | 'aveces' | 'nunca' | null>(mapExpense(state.expenseControl) || null);
-  const [savingHabit, setSavingHabit] = useState<'si' | 'no' | null>(mapSaving(state.savingHabit) || null);
-  const [largestExpense, setLargestExpense] = useState<'vivienda' | 'comida' | 'transporte' | 'deudas' | 'otro' | null>(
-    mapLargest(state.largestExpense) || null
-  );
+  const ingresoQuestion = screen3.questions.find((q) => q.id === 'ingreso') as any;
+  const importanciaQuestion = screen3.questions.find((q) => q.id === 'importanciaAhorro') as any;
+  const ocioQuestion = screen3.questions.find((q) => q.id === 'ocio') as any;
+
+  const [incomeFrequency, setIncomeFrequency] = useState<string | null>((state.ingreso as string) || null);
+  const [savingImportance, setSavingImportance] = useState<number | null>((state.importanciaAhorro as number) || null);
+  const [leisure, setLeisure] = useState<string | null>((state.ocio as string) || null);
 
   // This screen is step 3 in the flow
   useEffect(() => {
     setStep(3);
   }, [setStep]);
 
-  const progressPercent = Math.round((3 / TOTAL_STEPS) * 100);
-  const canContinue = !!incomeFrequency && !!expenseControl && !!savingHabit && !!largestExpense;
+  
+  // Only require the three sections: income, stars, leisure choice
+  const canContinue = !!incomeFrequency && !!savingImportance && !!leisure;
 
   const onContinue = () => {
     if (!canContinue) return;
-    updateAnswer('incomeFrequency', incomeFrequency);
-    updateAnswer('expenseControl', expenseControl);
-    updateAnswer('savingHabit', savingHabit);
-    updateAnswer('largestExpense', largestExpense);
+    updateAnswer('ingreso', incomeFrequency);
+    updateAnswer('importanciaAhorro', savingImportance);
+    updateAnswer('ocio', leisure);
+    // mark next step and navigate to processing simulation
     setStep(4);
-    // navigate to Lifestyle (step 4)
-    (navigation as any).navigate('Lifestyle');
+    (navigation as any).navigate('Processing');
   };
 
   const styles = OnboardingStyles;
 
   return (
     <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-      <View style={styles.progressWrap}>
-        <Text style={styles.stepText}>{`Paso 3 de ${TOTAL_STEPS}`}</Text>
-        <View style={styles.progressBar}>
-          <View style={[styles.progressFill, { width: `${progressPercent}%` }]} />
-        </View>
-      </View>
+      <Header title={screen3.title || 'Hablemos de tu situación financiera'} description={screen3.description || 'Esto nos ayudará a crear un presupuesto que realmente funcione para ti.'} step={3} total={3} />
 
-      <Text style={styles.title}>Hablemos de tu situación financiera</Text>
-      <Text style={styles.subtitle}>Esto nos ayudará a crear un presupuesto que realmente funcione para ti.</Text>
-
-      <Text style={styles.label}>¿Cada cuánto recibes tus ingresos?</Text>
+      <Text style={styles.label}>{(ingresoQuestion && ingresoQuestion.label) || '¿Cada cuánto recibes tus ingresos?'}</Text>
       <View style={styles.optionsColumn}>
-        <View style={styles.cardWrapper}>
-          <OptionCard title="Semanal" selected={incomeFrequency === 'semanal'} onPress={() => setIncomeFrequency('semanal')} />
-        </View>
-        <View style={styles.cardWrapperFull}>
-          <OptionCard title="Quincenal" selected={incomeFrequency === 'quincenal'} onPress={() => setIncomeFrequency('quincenal')} />
-        </View>
-        <View style={styles.cardWrapper}>
-          <OptionCard title="Mensual" selected={incomeFrequency === 'mensual'} onPress={() => setIncomeFrequency('mensual')} />
+        {((ingresoQuestion && ingresoQuestion.options) || ['Fijo', 'Variable', 'Mixto']).map((opt: string, idx: number) => (
+          <View key={opt} style={idx === 1 ? styles.cardWrapperFull : styles.cardWrapper}>
+            <OptionCard title={opt} titleStyle={styles.toneTitle} containerStyle={styles.toneCardCompact} selected={incomeFrequency === opt} onPress={() => setIncomeFrequency(opt)} />
+          </View>
+        ))}
+      </View>
+
+      <Text style={styles.label}>{(importanciaQuestion && importanciaQuestion.label) || '¿Qué tan importante es ahorrar para ti ahora mismo?'}</Text>
+      <View style={styles.starWrapper}>
+        <View style={styles.starRow}>
+          {((importanciaQuestion && importanciaQuestion.scale) || [1, 2, 3, 4, 5]).map((n: number) => (
+            <TouchableOpacity key={n} onPress={() => setSavingImportance(n)} activeOpacity={0.8}>
+              <Text style={[styles.star, savingImportance && n <= (savingImportance as number) ? styles.starActive : styles.starInactive]}>★</Text>
+            </TouchableOpacity>
+          ))}
         </View>
       </View>
 
-      <Text style={styles.label}>¿Sueles controlar tus gastos?</Text>
-      <View style={styles.optionsRowWrap}>
-        <View style={styles.cardWrapper}>
-          <OptionCard emoji="👍" title="Sí, siempre" selected={expenseControl === 'siempre'} onPress={() => setExpenseControl('siempre')} />
+      <Text style={styles.label}>{(ocioQuestion && ocioQuestion.label) || '¿Quieres incluir ocio en tu presupuesto?'}</Text>
+      {((ocioQuestion && ocioQuestion.options) || ['Sí', 'No', 'Un poco', 'Lo mínimo']).reduce((rows: any[], opt: string, idx: number) => {
+        const rowIndex = Math.floor(idx / 2);
+        rows[rowIndex] = rows[rowIndex] || [];
+        rows[rowIndex].push(opt);
+        return rows;
+      }, []).map((row: string[], rIdx: number) => (
+        <View style={styles.optionsRow} key={`row-${rIdx}`}>
+          {row.map((opt) => (
+            <View style={styles.cardWrapper} key={opt}>
+              <OptionCard title={opt} titleStyle={styles.toneTitle} containerStyle={styles.toneCardCompact} selected={leisure === opt} onPress={() => setLeisure(opt)} />
+            </View>
+          ))}
         </View>
-        <View style={styles.cardWrapper}>
-          <OptionCard emoji="🤔" title="A veces" selected={expenseControl === 'aveces'} onPress={() => setExpenseControl('aveces')} />
-        </View>
-      </View>
-      <View style={styles.optionsRowWrap}>
-        <View style={styles.cardWrapperFull}>
-          <OptionCard emoji="👎" title="No, nunca" selected={expenseControl === 'nunca'} onPress={() => setExpenseControl('nunca')} />
-        </View>
-      </View>
-
-      <Text style={styles.label}>¿Tienes el hábito de ahorrar?</Text>
-      <View style={styles.optionsRow}>
-        <View style={styles.cardWrapper}>
-          <OptionCard title="Sí" selected={savingHabit === 'si'} onPress={() => setSavingHabit('si')} />
-        </View>
-        <View style={styles.cardWrapper}>
-          <OptionCard title="No" selected={savingHabit === 'no'} onPress={() => setSavingHabit('no')} />
-        </View>
-      </View>
-
-      <Text style={styles.label}>¿Cuál es tu gasto fijo más grande?</Text>
-      <View style={styles.expenseGrid}>
-        <View style={styles.cardWrapper}>
-          <OptionCard emoji="🏠" title="Vivienda" selected={largestExpense === 'vivienda'} onPress={() => setLargestExpense('vivienda')} />
-        </View>
-        <View style={styles.cardWrapper}>
-          <OptionCard emoji="🛒" title="Comida" selected={largestExpense === 'comida'} onPress={() => setLargestExpense('comida')} />
-        </View>
-        <View style={styles.cardWrapper}>
-          <OptionCard emoji="🚗" title="Transporte" selected={largestExpense === 'transporte'} onPress={() => setLargestExpense('transporte')} />
-        </View>
-        <View style={styles.cardWrapper}>
-          <OptionCard emoji="💳" title="Deudas" selected={largestExpense === 'deudas'} onPress={() => setLargestExpense('deudas')} />
-        </View>
-        <View style={styles.cardWrapperFull}>
-          <OptionCard emoji="🤷‍♀️" title="Otro" selected={largestExpense === 'otro'} onPress={() => setLargestExpense('otro')} />
-        </View>
-      </View>
+      ))}
 
       <View style={styles.buttonContainerFull}>
         <TouchableOpacity
@@ -123,7 +93,7 @@ const OnboardingFinancialSituation: React.FC = () => {
           onPress={onContinue}
           activeOpacity={0.9}
         >
-          <Text style={[styles.continueText, !canContinue && styles.continueTextDisabled]}>Continuar</Text>
+          <Text style={[styles.continueText, !canContinue && styles.continueTextDisabled]}>Listo — generar plan</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
