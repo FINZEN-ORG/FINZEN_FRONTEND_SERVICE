@@ -1,43 +1,61 @@
+// Paleta Finzen actualizada
+// Colores proporcionados: #eafff2, #A9F8C4, #00C66D, #008942, #00481c
 
+// Paleta Finzen actualizada
+// Colores proporcionados: #EAFFF2, #e4ffed, #cdfedc, #a9f8c4, #30e88c, #5fdc93, #00c66d, #00A654, #008942, #00662d, #00481c
 
-// Colores proporcionados: 
-// #eafff2, #A9F8C4, #00C66D, #008942, #00481c
 export const colors = {
+  // Full palette array (top -> bottom as provided)
+  paletteArray: [
+    '#EAFFF2',
+    '#e4ffed',
+    '#cdfedc',
+    '#a9f8c4',
+    '#30e88c',
+    '#5fdc93',
+    '#00c66d',
+    '#00A654',
+    '#008942',
+    '#00662d',
+    '#00481c',
+  ],
 
-  palette: {
-    veryLight: '#eafff2', 
-    light: '#A9F8C4',
-    accent: '#00C66D',
-    dark: '#008942',
-    darkest: '#00481c',
-  },
-
-  // Semantic tokens
-  primary: '#00C66D',
+  // Named tokens for easier consumption across the app
+  primary: '#00c66d',
+  primaryAlt: '#00A654',
   primaryDark: '#008942',
-  primaryDarker: '#00481c',
+  primaryDarker: '#00662d',
+  primaryDeep: '#00481c',
 
-  background: '#eafff2',
-  backgroundSecondary: '#e9efe9ff',
+  // Light backgrounds (usable for gradients or layers)
+  backgroundLightest: '#EAFFF2',
+  backgroundLighter: '#e4ffed',
+  backgroundLight: '#cdfedc',
+  backgroundSoft: '#a9f8c4',
+
+  // Accent mid tones
+  accentLight: '#30e88c',
+  accent: '#5fdc93',
+
+  // General UI tokens
+  background: '#EAFFF2',
   surface: '#FFFFFF',
-
-  // Text colors (permitidos adicionalmente: negro y blanco)
   textPrimary: '#000000',
   textSecondary: '#00481c',
-  textLight: '#ffffff',
+  textOnPrimary: '#ffffff',
 
   // Borders / subtle elements
   border: '#dff6e9',
   borderLight: '#f4fff8',
 
   // Status
-  success: '#00C66D',
-  info: '#A9F8C4',
+  success: '#00c66d',
+  info: '#a9f8c4',
   warning: '#008942',
-  error: '#E74C3C', // mantener rojo para errores
+  error: '#E74C3C',
 
   // Financial semantic colors (aligned to palette)
-  income: '#00C66D',
+  income: '#00c66d',
   savings: '#008942',
   investment: '#00481c',
   expense: '#FF7A6B',
