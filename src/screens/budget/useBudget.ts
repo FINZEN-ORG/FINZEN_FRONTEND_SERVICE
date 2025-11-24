@@ -1,7 +1,8 @@
 import { useState, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
+import BudgetService, { BudgetDto } from '../../services/BudgetService';
 import CategoryService, { CategoryDto } from '../../services/CategoryService';
-import TransactionService, { TransactionResponse } from '../../services/TransactionService';
+import TransactionService from '../../services/TransactionService';
 
 const CATEGORY_EMOJIS: { [key: string]: string } = {
     'Food': '🍔', 'Transport': '⛽', 'Entertainment': '🎬', 'Health': '🏥', 'Housing': '🏠',
@@ -13,24 +14,33 @@ const CATEGORY_EMOJIS: { [key: string]: string } = {
 };
 
 export default function useBudget() {
+    const [budgets, setBudgets] = useState<BudgetDto[]>([]);
     const [categories, setCategories] = useState<CategoryDto[]>([]);
-    const [expenses, setExpenses] = useState<TransactionResponse[]>([]);
+    const [recentExpenses, setRecentExpenses] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
     const loadData = async () => {
         try {
             setLoading(true);
-            const [categoriesData, transactionsData] = await Promise.all([
+
+            // Cargar Categorías, Presupuestos y Gastos en paralelo
+            const [catsData, budgetsData, transactionsData] = await Promise.all([
                 CategoryService.getAllCategories(),
+                BudgetService.getAllBudgets(), // Esto ya trae 'spent' calculado del backend
                 TransactionService.getAllTransactions()
             ]);
 
-            setCategories(categoriesData);
+            setCategories(catsData);
+            setBudgets(budgetsData);
 
-            const expensesData = transactionsData.filter(t => t.type === 'EXPENSE');
-            setExpenses(expensesData);
+            // Filtramos solo gastos recientes para mostrar en la lista inferior
+            const expenses = transactionsData
+                .filter(t => t.type === 'EXPENSE')
+                .slice(0, 5); // Solo los últimos 5
+            setRecentExpenses(expenses);
+
         } catch (error) {
-            // keep silent; UI will handle empty state
+            console.error("Error loading budget screen:", error);
         } finally {
             setLoading(false);
         }
@@ -42,36 +52,42 @@ export default function useBudget() {
         }, [])
     );
 
-    const mapCategoriesToDisplay = () => {
-        return categories.map(cat => ({
-            id: cat.id,
-            logo: CATEGORY_EMOJIS[cat.name] || '📦',
-            title: cat.name
-        }));
+    // Mapeamos los budgets para que la UI los pueda pintar fácil
+    const mapBudgetsToDisplay = () => {
+        return budgets.map(b => {
+            const category = categories.find(c => c.id === b.categoryId);
+            const catName = category?.name || 'Unknown';
+            return {
+                id: b.id,
+                title: catName,
+                icon: CATEGORY_EMOJIS[catName] || '📦',
+                limit: b.amount,
+                spent: b.spent || 0, // Viene del backend
+                percentage: b.amount > 0 ? ((b.spent || 0) / b.amount) : 0,
+                color: '#6C5CE7' // Podrías mapear colores por categoría si quieres
+            };
+        });
     };
 
     const mapExpensesToDisplay = () => {
-        return expenses.map(expense => {
+        return recentExpenses.map(expense => {
             const category = categories.find(c => c.id === expense.categoryId);
             const categoryName = category?.name || 'Other';
-
             return {
                 id: expense.id,
                 categoryIcon: CATEGORY_EMOJIS[categoryName] || '📦',
                 description: expense.description,
                 amount: expense.amount,
                 date: new Date(expense.date).toISOString().split('T')[0],
-                category: categoryName.toLowerCase()
+                category: categoryName
             };
         });
     };
 
     return {
         loading,
-        categories,
-        expenses,
-        mapCategoriesToDisplay,
-        mapExpensesToDisplay,
+        budgets: mapBudgetsToDisplay(),
+        expenses: mapExpensesToDisplay(),
         reload: loadData,
     };
 }

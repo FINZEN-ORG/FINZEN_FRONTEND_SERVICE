@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { View, Text, ActivityIndicator, FlatList } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AppStackParamList } from '../../types/navigation';
@@ -14,41 +14,12 @@ import AIMessage, { MessageType } from '../../components/AIMessage';
 import { globalStyles } from '../../styles';
 import useBudget from './useBudget';
 
-// emoji map moved into useBudget
-
 const BudgetScreen: React.FC = () => {
-    const navigation = useNavigation<StackNavigationProp<AppStackParamList>>();
+    const navigation = useNavigation<any>(); // simplificado
     const [showFloatingMenu, setShowFloatingMenu] = useState(false);
+    const { loading, budgets, expenses, reload } = useBudget();
 
-    // Data + logic extracted to useBudget
-    const { loading, mapCategoriesToDisplay, mapExpensesToDisplay, expenses } = useBudget();
-
-    const handleCategoryPress = (categoryId: number, title: string) => {
-        console.log(`Presionaste: ${title} (ID: ${categoryId})`);
-    };
-
-    const handleExpensePress = (expenseId: number, description: string) => {
-        console.log(`Presionaste gasto: ${description} (ID: ${expenseId})`);
-    };
-
-    const toggleFloatingMenu = () => {
-        setShowFloatingMenu(!showFloatingMenu);
-    };
-
-    const handleAddExpense = () => {
-        setShowFloatingMenu(false);
-        navigation.navigate('AddExpense');
-    };
-
-    const handleAddIncome = () => {
-        setShowFloatingMenu(false);
-        navigation.navigate('AddIncome');
-    };
-
-    const handleCreateCategory = () => {
-        setShowFloatingMenu(false);
-        navigation.navigate('NewCategory');
-    };
+    // Handlers del menú flotante (igual que antes) ...
 
     if (loading) {
         return (
@@ -60,45 +31,65 @@ const BudgetScreen: React.FC = () => {
 
     return (
         <View style={globalStyles.screenContainer}>
-            <ScreenTitle
-                title="Presupuesto"
-                subtitle="Un plan sencillo para lograr grandes metas"
+            <ScreenTitle title="Presupuesto" subtitle="Controla tus límites mensuales" />
+
+            {/* Sección de Presupuestos (Barras de Progreso) */}
+            <SectionSubtitle text="Mis Presupuestos" marginTop={true} />
+
+            <FlatList
+                data={budgets}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                keyExtractor={(item) => item.id?.toString() || Math.random().toString()}
+                renderItem={({ item }) => (
+                    <View style={{
+                        width: 160,
+                        height: 140,
+                        backgroundColor: 'white',
+                        borderRadius: 12,
+                        padding: 12,
+                        marginRight: 10,
+                        elevation: 2
+                    }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                            <Text style={{ fontSize: 24 }}>{item.icon}</Text>
+                            <Text style={{ fontWeight: 'bold' }}>${item.limit}</Text>
+                        </View>
+                        <Text style={{ marginTop: 8, fontWeight: '600' }}>{item.title}</Text>
+
+                        <View style={{ marginTop: 15 }}>
+                            <Text style={{ fontSize: 10, color: '#666' }}>Gastado: ${item.spent}</Text>
+                            {/* Barra de progreso simple */}
+                            <View style={{
+                                height: 6,
+                                backgroundColor: '#EEE',
+                                borderRadius: 3,
+                                marginTop: 4
+                            }}>
+                                <View style={{
+                                    width: `${Math.min(item.percentage * 100, 100)}%`,
+                                    height: '100%',
+                                    backgroundColor: item.percentage > 1 ? 'red' : item.color,
+                                    borderRadius: 3
+                                }} />
+                            </View>
+                        </View>
+                    </View>
+                )}
+                contentContainerStyle={{ paddingHorizontal: 5, paddingBottom: 10 }}
             />
 
-            {expenses.length > 0 && (
-                <AIMessage
-                    type={'info' as MessageType}
-                    mensaje={`Has registrado ${expenses.length} gastos este mes`}
-                />
-            )}
-
-            <SectionSubtitle
-                text="Categorías de Gastos"
-                marginTop={true}
-            />
-            <CategoriesSection
-                categories={mapCategoriesToDisplay()} // ✅ Convertir al formato esperado
-                onCategoryPress={handleCategoryPress}
-            />
-
-            <SectionSubtitle
-                text="Gastos Recientes"
-                marginTop={true}
-            />
-            <ExpensesList
-                expenses={mapExpensesToDisplay()} // ✅ Convertir al formato esperado
-                onExpensePress={handleExpensePress}
-            />
+            <SectionSubtitle text="Gastos Recientes" marginTop={true} />
+            <ExpensesList expenses={expenses} onExpensePress={() => {}} />
 
             <FloatingActionButton
                 isMenuOpen={showFloatingMenu}
-                onToggleMenu={toggleFloatingMenu}
-                onCreateCategory={handleCreateCategory}
-                onAddExpense={handleAddExpense}
-                onAddIncome={handleAddIncome}
+                onToggleMenu={() => setShowFloatingMenu(!showFloatingMenu)}
+                onCreateCategory={() => { setShowFloatingMenu(false); navigation.navigate('NewCategory'); }}
+                onAddExpense={() => { setShowFloatingMenu(false); navigation.navigate('AddExpense'); }}
+                onAddIncome={() => { setShowFloatingMenu(false); navigation.navigate('AddIncome'); }}
             />
         </View>
     );
 };
-
 export default BudgetScreen;

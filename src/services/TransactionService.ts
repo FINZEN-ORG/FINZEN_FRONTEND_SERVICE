@@ -2,6 +2,11 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { TRANSACTIONS_API_BASE_URL } from "@env";
 
+export interface CategoryTotalDto {
+    categoryId: number;
+    totalAmount: number;
+}
+
 export interface TransactionRequest {
     amount: number;
     description: string;
@@ -92,6 +97,17 @@ class TransactionService {
         const headers = await this.getAuthHeader();
     const url = `${TRANSACTIONS_API_BASE_URL}/transactions/reports`;
         const response = await axios.get(url, { headers });
+        return response.data;
+    }
+
+    // NUEVO: Endpoint para reportes de categorías (usado internamente por GoalService, pero útil tenerlo)
+    static async getCategorySummary(startDate: string, endDate: string): Promise<CategoryTotalDto[]> {
+        const headers = await this.getAuthHeader();
+        const url = `${TRANSACTIONS_API_BASE_URL}/transactions/summary`;
+        const response = await axios.get(url, {
+            headers,
+            params: { startDate, endDate }
+        });
         return response.data;
     }
 }
