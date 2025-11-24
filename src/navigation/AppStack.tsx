@@ -19,8 +19,8 @@ export default function AppStack() {
     >
       <Stack.Screen name="Main" component={TabNavigator} />
       <Stack.Screen name="AddExpense" component={AddExpenseScreen} />
-  <Stack.Screen name="AddIncome" component={AddIncomeScreen} />
-  <Stack.Screen name="NewCategory" component={NewCategoryScreen} />
+      <Stack.Screen name="AddIncome" component={AddIncomeScreen} />
+      <Stack.Screen name="NewCategory" component={NewCategoryScreen} />
       
       {/* Futuras pantallas que necesiten stack navigation */}
       {/* <Stack.Screen name="Profile" component={ProfileScreen} /> */}

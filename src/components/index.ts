@@ -36,3 +36,6 @@ export { default as ButtonItem } from './ButtonItem';
 
 // HeaderWithBack
 export { HeaderWithBack, type HeaderWithBackProps } from './HeaderWithBack';
+
+// OptionCard (Onboarding)
+export { default as OptionCard } from './OptionCard/OptionCard';
