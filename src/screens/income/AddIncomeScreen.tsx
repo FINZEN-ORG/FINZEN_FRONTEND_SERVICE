@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-} from 'react-native';
+import { View, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { CategoriesSection, HeaderWithBack, FormRenderer, ButtonRenderer } from '../../components';
 import { globalStyles } from '../../styles';
@@ -13,7 +10,6 @@ import useIncomeForm from './useIncomeForm';
 
 const AddIncomeScreen: React.FC = () => {
   const navigation = useNavigation();
-
   const {
     values,
     setField,
@@ -23,30 +19,32 @@ const AddIncomeScreen: React.FC = () => {
     handleCancel,
   } = useIncomeForm();
 
+  // Estado local para mapear al formato visual
   const [categories, setCategories] = useState<Array<{ id: number; logo: string; title: string }>>([]);
-
-  const CATEGORY_EMOJIS: { [key: string]: string } = {
-    'Salary': '💼', 'Salario': '💼', 'Other': '📦', 'Otro': '📦',
-    'Food': '🍔', 'Comida': '🍔', 'Transport': '⛽', 'Transporte': '⛽',
-    'Entertainment': '🎬', 'Entretenimiento': '🎬', 'Health': '🏥', 'Salud': '🏥',
-  };
 
   useEffect(() => {
     let mounted = true;
     const load = async () => {
       try {
-        const cats: CategoryDto[] = await CategoryService.getAllCategories();
+        // Pedimos solo categorías de INGRESO
+        const cats = await CategoryService.getCategoriesByType('INCOME');
         if (!mounted) return;
-        const mapped = cats.map(c => ({ id: c.id, logo: CATEGORY_EMOJIS[c.name] || '📦', title: c.name }));
+
+        // Mapeamos usando el icono que viene del backend (o un default si es null)
+        const mapped = cats.map(c => ({
+          id: c.id,
+          logo: c.icon || '💰', // Usamos c.icon del backend
+          title: c.name
+        }));
         setCategories(mapped);
       } catch (err) {
-        console.warn('No se pudieron cargar las categorías de ingreso:', err);
+        console.warn('Error cargando categorías:', err);
       }
     };
     load();
     return () => { mounted = false; };
-  });
-  
+  }, []);
+
   return (
       <View style={globalStyles.screenContainer}>
         <HeaderWithBack title="Añadir Ingreso" onBackPress={() => navigation.goBack()} />
@@ -55,20 +53,19 @@ const AddIncomeScreen: React.FC = () => {
           <View style={form.section}>
             <Text style={form.label}>Categorías:</Text>
             <CategoriesSection
-              categories={categories}
-              onCategoryPress={handleCategorySelect}
-              selectedCategory={selectedCategory}
-              selectionMode={true}
-              containerStyle={form.categoriesSection}
+                categories={categories}
+                onCategoryPress={handleCategorySelect}
+                selectedCategory={selectedCategory}
+                selectionMode={true}
+                containerStyle={form.categoriesSection}
             />
           </View>
         </View>
         <ButtonRenderer
-          buttons={userButtons}
-          handlers={{ confirm: handleConfirm, cancel: handleCancel }}
+            buttons={userButtons}
+            handlers={{ confirm: handleConfirm, cancel: handleCancel }}
         />
       </View>
   );
 };
-
 export default AddIncomeScreen;

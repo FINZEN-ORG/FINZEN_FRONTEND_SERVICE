@@ -8,8 +8,9 @@ export default function useNewCategory() {
   const navigation = useNavigation();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [budget, setBudget] = useState('');
+  const [selectedType, setSelectedType] = useState('');
+  const [selectedEmoji, setSelectedEmoji] = useState('📁');
 
   const handleCreate = async () => {
     if (!name.trim()) {
@@ -19,7 +20,11 @@ export default function useNewCategory() {
 
     try {
       // 1. Crear Categoría en Transactions
-      const catPayload = { name: name.trim() }; // TransactionService ignora descripción y color por ahora en tu backend
+      const catPayload = {
+        name: name.trim(),
+        type: selectedType,
+        icon: selectedEmoji || '📁'
+      };
       const createdCategory = await CategoryService.createCategory(catPayload);
 
       // 2. Si el usuario definió un presupuesto, crearlo en Goals vinculado a la categoría
@@ -42,13 +47,12 @@ export default function useNewCategory() {
     navigation.goBack();
   };
 
-  // ... setters y return ...
   return {
     name, setName,
     description, setDescription,
-    selectedColor, setSelectedColor,
+    selectedType, setSelectedType,
+    selectedEmoji, setSelectedEmoji,
     budget, setBudget,
-    handleCreate, handleCancel,
-    importance: null, setImportance: () => {} // Stubs para compatibilidad con UI
+    handleCreate, handleCancel
   };
 }

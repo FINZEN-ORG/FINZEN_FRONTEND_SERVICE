@@ -4,15 +4,10 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  Pressable,
   ScrollView,
 } from 'react-native';
 import { styles } from './NewCategoryScreen.Style';
 import useNewCategory from './useNewCategory';
-
-const COLORS = [
-  '#F7C777', '#F3A76B', '#FFD3A5', '#9FE6C9', '#7FD3D3', '#CDEAF0'
-];
 
 const NewCategoryScreen: React.FC = () => {
   const {
@@ -20,12 +15,12 @@ const NewCategoryScreen: React.FC = () => {
     setName,
     description,
     setDescription,
-    selectedColor,
-    setSelectedColor,
+    selectedEmoji,
+    setSelectedEmoji,
+    type,
+    setType,
     budget,
     setBudget,
-    importance,
-    setImportance,
     handleCreate,
     handleCancel,
   } = useNewCategory();
@@ -34,10 +29,104 @@ const NewCategoryScreen: React.FC = () => {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Nueva Categoría</Text>
 
+      {/* Selector de Tipo (Gasto vs Ingreso) */}
+      <View
+        style={{
+          flexDirection: 'row',
+          marginBottom: 20,
+          backgroundColor: '#EEE',
+          borderRadius: 10,
+          padding: 4,
+        }}
+      >
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            padding: 10,
+            backgroundColor: type === 'EXPENSE' ? 'white' : 'transparent',
+            borderRadius: 8,
+            alignItems: 'center',
+          }}
+          onPress={() => setType('EXPENSE')}
+        >
+          <Text
+            style={{
+              fontWeight: 'bold',
+              color: type === 'EXPENSE' ? 'black' : '#666',
+            }}
+          >
+            Gasto 💸
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            padding: 10,
+            backgroundColor: type === 'INCOME' ? 'white' : 'transparent',
+            borderRadius: 8,
+            alignItems: 'center',
+          }}
+          onPress={() => setType('INCOME')}
+        >
+          <Text
+            style={{
+              fontWeight: 'bold',
+              color: type === 'INCOME' ? 'black' : '#666',
+            }}
+          >
+            Ingreso 💰
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* INPUT DE EMOJI NATIVO */}
+      <Text style={styles.label}>Icono (Toca para cambiar)</Text>
+      <View style={{ alignItems: 'center', marginBottom: 20 }}>
+        <View
+          style={{
+            width: 80,
+            height: 80,
+            borderRadius: 40,
+            backgroundColor: '#F0F0F0',
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 1,
+            borderColor: '#DDD',
+          }}
+        >
+          <TextInput
+            style={{
+              fontSize: 40,
+              textAlign: 'center',
+              padding: 0,
+              width: '100%',
+              height: '100%',
+            }}
+            value={selectedEmoji}
+            onChangeText={text => {
+              // Truco: Solo permitimos el último caracter ingresado (para reemplazar el anterior)
+              // o validamos que sea un emoji (opcional, pero complejo).
+              // Para simplificar: Tomamos el último caracter si escribe más de uno.
+              if (text.length > 0) {
+                const lastChar = text.slice(-1); // O usa una librería como 'grapheme-splitter' para emojis compuestos, pero slice suele bastar.
+                setSelectedEmoji(lastChar);
+              } else {
+                setSelectedEmoji(''); // Permite borrar
+              }
+            }}
+            maxLength={2} // Algunos emojis ocupan 2 espacios
+            placeholder="😀"
+          />
+        </View>
+        <Text style={{ fontSize: 12, color: '#888', marginTop: 5 }}>
+          Usa tu teclado de emojis
+        </Text>
+      </View>
+
       <Text style={styles.label}>Nombre</Text>
       <TextInput
         style={styles.input}
-        placeholder="Ej: familia"
+        placeholder={type === 'EXPENSE' ? 'Ej: Cervezas' : 'Ej: Freelance'}
         value={name}
         onChangeText={setName}
       />
@@ -50,22 +139,9 @@ const NewCategoryScreen: React.FC = () => {
         onChangeText={setDescription}
       />
 
-      <Text style={styles.label}>Selecciona un color</Text>
-      <View style={styles.colorsRow}>
-        {COLORS.map(c => (
-          <Pressable
-            key={c}
-            onPress={() => setSelectedColor(c)}
-            style={[
-              styles.colorCircle,
-              { backgroundColor: c },
-              selectedColor === c && styles.colorSelected
-            ]}
-          />
-        ))}
-      </View>
-
-      <Text style={styles.label}>Establecer un presupuesto inicial (Opcional)</Text>
+      <Text style={styles.label}>
+        Establecer un presupuesto inicial (Opcional)
+      </Text>
       <TextInput
         style={styles.input}
         placeholder="$0.00"
@@ -74,33 +150,11 @@ const NewCategoryScreen: React.FC = () => {
         keyboardType="numeric"
       />
 
-      <Text style={styles.label}>Establece la importancia</Text>
-      <View style={styles.importanceRow}>
-        {(['Alta', 'Media', 'Baja'] as const).map(level => (
-          <TouchableOpacity
-            key={level}
-            onPress={() => setImportance(level)}
-            style={[
-              styles.importanceBtn,
-              importance === level && styles.importanceBtnActive
-            ]}
-          >
-            <Text
-              style={[
-                styles.importanceTxt,
-                importance === level && styles.importanceTxtActive
-              ]}
-            >
-              {level}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
       <View style={styles.aiBox}>
         <Text style={styles.aiTitle}>Sugerencias de la IA</Text>
         <Text style={styles.aiText}>
-          Según tus ingresos, te recomendamos este presupuesto para mantener tus finanzas equilibradas:
+          Según tus ingresos, te recomendamos este presupuesto para mantener tus
+          finanzas equilibradas:
         </Text>
         <Text style={styles.aiAmount}>$200.000</Text>
       </View>
@@ -109,7 +163,10 @@ const NewCategoryScreen: React.FC = () => {
         <Text style={styles.primaryBtnText}>Crear Categoría</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.secondaryBtn} onPress={() => handleCancel()}>
+      <TouchableOpacity
+        style={styles.secondaryBtn}
+        onPress={() => handleCancel()}
+      >
         <Text style={styles.secondaryBtnText}>Cancelar</Text>
       </TouchableOpacity>
     </ScrollView>

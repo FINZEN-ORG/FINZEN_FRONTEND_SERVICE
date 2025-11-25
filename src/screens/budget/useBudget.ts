@@ -4,15 +4,6 @@ import BudgetService, { BudgetDto } from '../../services/BudgetService';
 import CategoryService, { CategoryDto } from '../../services/CategoryService';
 import TransactionService from '../../services/TransactionService';
 
-const CATEGORY_EMOJIS: { [key: string]: string } = {
-    'Food': '🍔', 'Transport': '⛽', 'Entertainment': '🎬', 'Health': '🏥', 'Housing': '🏠',
-    'Salary': '💼', 'Other': '📦', 'Comida': '🍔', 'Transporte': '⛽', 'Entretenimiento': '🎬',
-    'Salud': '🏥', 'Vivienda': '🏠', 'Salario': '💼', 'Otro': '📦', 'Ropa y Accesorios': '👕',
-    'Tecnología': '💻', 'Educación': '📚', 'Servicios y Facturas': '💡', 'Compras': '🛒',
-    'Inversiones': '📈', 'Regalos': '🎁', 'Reembolsos': '💰', 'Ventas': '🛍️', 'Alquiler': '🏠',
-    'Freelance': '🧾', 'Otros': '📜'
-};
-
 export default function useBudget() {
     const [budgets, setBudgets] = useState<BudgetDto[]>([]);
     const [categories, setCategories] = useState<CategoryDto[]>([]);
@@ -56,15 +47,17 @@ export default function useBudget() {
     const mapBudgetsToDisplay = () => {
         return budgets.map(b => {
             const category = categories.find(c => c.id === b.categoryId);
-            const catName = category?.name || 'Unknown';
+            const catName = category?.name || 'Desconocido';
+            const catIcon = category?.icon || '📦'; // Usamos el icono real
+
             return {
                 id: b.id,
                 title: catName,
-                icon: CATEGORY_EMOJIS[catName] || '📦',
+                icon: catIcon,
                 limit: b.amount,
-                spent: b.spent || 0, // Viene del backend
+                spent: b.spent || 0,
                 percentage: b.amount > 0 ? ((b.spent || 0) / b.amount) : 0,
-                color: '#6C5CE7' // Podrías mapear colores por categoría si quieres
+                color: '#6C5CE7'
             };
         });
     };
@@ -72,14 +65,13 @@ export default function useBudget() {
     const mapExpensesToDisplay = () => {
         return recentExpenses.map(expense => {
             const category = categories.find(c => c.id === expense.categoryId);
-            const categoryName = category?.name || 'Other';
             return {
                 id: expense.id,
-                categoryIcon: CATEGORY_EMOJIS[categoryName] || '📦',
+                categoryIcon: category?.icon || '💸', // Usamos el icono real
                 description: expense.description,
                 amount: expense.amount,
                 date: new Date(expense.date).toISOString().split('T')[0],
-                category: categoryName
+                category: category?.name || 'Gasto'
             };
         });
     };

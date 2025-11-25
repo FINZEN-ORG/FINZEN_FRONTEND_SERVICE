@@ -9,14 +9,6 @@ import { useAddExpense } from './useExpenseForm';
 import CategoryService, { CategoryDto } from '../../services/CategoryService';
 import { KeyboardAvoidingView, ScrollView } from "react-native";
 
-// Emoji map for display logos (fallback)
-const CATEGORY_EMOJIS: { [key: string]: string } = {
-  'Food': '🍔', 'Transport': '⛽', 'Entertainment': '🎬', 'Health': '🏥', 'Housing': '🏠',
-  'Salary': '💼', 'Other': '📦', 'Comida': '🍔', 'Transporte': '⛽', 'Entretenimiento': '🎬',
-  'Salud': '🏥', 'Vivienda': '🏠', 'Salario': '💼', 'Otro': '📦', 'Ropa y Accesorios': '👕',
-  'Tecnología': '💻',
-};
-
 const AddExpenseScreen: React.FC = () => {
   const navigation = useNavigation();
   const {
@@ -34,9 +26,13 @@ const AddExpenseScreen: React.FC = () => {
     let mounted = true;
     const load = async () => {
       try {
-        const cats: CategoryDto[] = await CategoryService.getAllCategories();
+        const cats = await CategoryService.getCategoriesByType('EXPENSE');
         if (!mounted) return;
-        const mapped = cats.map(c => ({ id: c.id, logo: CATEGORY_EMOJIS[c.name] || '📦', title: c.name }));
+        const mapped = cats.map(c => ({
+          id: c.id,
+          logo: c.icon || '💸', // Usamos c.icon del backend
+          title: c.name
+        }));
         setCategories(mapped);
       } catch (err) {
         console.warn('No se pudieron cargar las categorías:', err);
@@ -95,8 +91,6 @@ const AddExpenseScreen: React.FC = () => {
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
-
-
   );
 };
 

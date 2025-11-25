@@ -5,6 +5,8 @@ import { TRANSACTIONS_API_BASE_URL } from "@env";
 export interface CategoryDto {
     id: number;
     name: string;
+    type: 'INCOME' | 'EXPENSE';
+    icon: string;
     predefined: boolean;
 }
 
@@ -15,21 +17,25 @@ class CategoryService {
         return { Authorization: `Bearer ${token}` };
     }
 
-    // GET /api/categories - Obtener todas las categorías del usuario
-    static async getAllCategories(): Promise<CategoryDto[]> {
+    static async getCategoriesByType(type: 'INCOME' | 'EXPENSE'): Promise<CategoryDto[]> {
         const headers = await this.getAuthHeader();
         const url = `${TRANSACTIONS_API_BASE_URL}/categories`;
-        const response = await axios.get(url, { headers });
+        const response = await axios.get(url, {
+            headers,
+            params: { type }
+        });
         return response.data;
     }
 
-    // POST /api/categories - Crear categoría personalizada
-    static async createCategory(data: { name: string }): Promise<CategoryDto> {
+    static async getAllCategories(): Promise<CategoryDto[]> {
+        return this.getCategoriesByType('EXPENSE');
+    }
+
+    static async createCategory(data: { name: string, type: 'INCOME' | 'EXPENSE' }): Promise<CategoryDto> {
         const headers = await this.getAuthHeader();
         const url = `${TRANSACTIONS_API_BASE_URL}/categories`;
         const response = await axios.post(url, data, { headers });
         return response.data;
     }
 }
-
 export default CategoryService;

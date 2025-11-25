@@ -1,25 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, ActivityIndicator, FlatList } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { AppStackParamList } from '../../types/navigation';
 import {
     ScreenTitle,
     SectionSubtitle,
-    CategoriesSection,
     ExpensesList,
-    FloatingActionButton
 } from '../../components';
-import AIMessage, { MessageType } from '../../components/AIMessage';
 import { globalStyles } from '../../styles';
 import useBudget from './useBudget';
 
 const BudgetScreen: React.FC = () => {
-    const navigation = useNavigation<any>(); // simplificado
-    const [showFloatingMenu, setShowFloatingMenu] = useState(false);
-    const { loading, budgets, expenses, reload } = useBudget();
-
-    // Handlers del menú flotante (igual que antes) ...
+    const { loading, budgets, expenses } = useBudget();
 
     if (loading) {
         return (
@@ -81,14 +71,6 @@ const BudgetScreen: React.FC = () => {
 
             <SectionSubtitle text="Gastos Recientes" marginTop={true} />
             <ExpensesList expenses={expenses} onExpensePress={() => {}} />
-
-            <FloatingActionButton
-                isMenuOpen={showFloatingMenu}
-                onToggleMenu={() => setShowFloatingMenu(!showFloatingMenu)}
-                onCreateCategory={() => { setShowFloatingMenu(false); navigation.navigate('NewCategory'); }}
-                onAddExpense={() => { setShowFloatingMenu(false); navigation.navigate('AddExpense'); }}
-                onAddIncome={() => { setShowFloatingMenu(false); navigation.navigate('AddIncome'); }}
-            />
         </View>
     );
 };
