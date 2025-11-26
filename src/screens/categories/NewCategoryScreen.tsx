@@ -19,8 +19,6 @@ const NewCategoryScreen: React.FC = () => {
     setSelectedEmoji,
     selectedType,
     setSelectedType,
-    budget,
-    setBudget,
     handleCreate,
     handleCancel,
   } = useNewCategory();
@@ -28,7 +26,6 @@ const NewCategoryScreen: React.FC = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Nueva Categoría</Text>
-
       {/* Selector de Tipo (Gasto vs Ingreso) */}
       <View
         style={{
@@ -138,26 +135,6 @@ const NewCategoryScreen: React.FC = () => {
         value={description}
         onChangeText={setDescription}
       />
-
-      {/* El presupuesto solo tiene sentido para Gastos */}
-      {selectedType === 'EXPENSE' && (
-          <>
-              <Text style={styles.label}>Presupuesto Inicial (Opcional)</Text>
-              <TextInput
-                  style={styles.input}
-                  placeholder="$0.00"
-                  value={budget}
-                  onChangeText={setBudget}
-                  keyboardType="numeric"
-              />
-              <View style={styles.aiBox}>
-                  <Text style={styles.aiTitle}>Tip FinZen</Text>
-                  <Text style={styles.aiText}>
-                      Asignar un presupuesto te ayuda a controlar esta categoría desde el primer día.
-                  </Text>
-              </View>
-          </>
-      )}
 
       <TouchableOpacity style={styles.primaryBtn} onPress={handleCreate}>
         <Text style={styles.primaryBtnText}>Crear Categoría</Text>

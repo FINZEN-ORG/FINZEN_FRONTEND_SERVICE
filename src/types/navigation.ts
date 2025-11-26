@@ -18,6 +18,7 @@ export type AppStackParamList = {
   // Pantallas adicionales que necesiten stack navigation
   AddExpense: undefined;
   AddIncome: undefined;
+  NewBudget: undefined;
   // Futuras pantallas autenticadas
   // Profile: undefined;
   // Settings: undefined;

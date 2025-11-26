@@ -90,7 +90,7 @@ const Dashboard: React.FC = () => {
             <FloatingActionButton
                 isMenuOpen={showFloatingMenu}
                 onToggleMenu={() => setShowFloatingMenu(!showFloatingMenu)}
-                onCreateCategory={() => { /* No acción en Dashboard */ }}
+                onCreateCategory={() => { setShowFloatingMenu(false); navigation.navigate('NewCategory'); }}
                 onAddExpense={() => { setShowFloatingMenu(false); navigation.navigate('AddExpense'); }}
                 onAddIncome={() => { setShowFloatingMenu(false); navigation.navigate('AddIncome'); }}
             />

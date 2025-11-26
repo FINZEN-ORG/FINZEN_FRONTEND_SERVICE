@@ -6,6 +6,7 @@ import TabNavigator from "../components/TabNavigator/TabNavigator";
 import AddExpenseScreen from "../screens/expenses/AddExpenseScreen";
 import AddIncomeScreen from "../screens/income/AddIncomeScreen";
 import NewCategoryScreen from "../screens/categories/NewCategoryScreen";
+import NewBudgetScreen from "../screens/budget/NewBudgetScreen";
 
 const Stack = createStackNavigator<AppStackParamList>();
 
@@ -21,7 +22,7 @@ export default function AppStack() {
       <Stack.Screen name="AddExpense" component={AddExpenseScreen} />
       <Stack.Screen name="AddIncome" component={AddIncomeScreen} />
       <Stack.Screen name="NewCategory" component={NewCategoryScreen} />
-      
+      <Stack.Screen name="NewBudget" component={NewBudgetScreen} />
       {/* Futuras pantallas que necesiten stack navigation */}
       {/* <Stack.Screen name="Profile" component={ProfileScreen} /> */}
       {/* <Stack.Screen name="Settings" component={SettingsScreen} /> */}

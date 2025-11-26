@@ -2,13 +2,11 @@ import { useState } from 'react';
 import { Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import CategoryService from '../../services/CategoryService';
-import BudgetService from '../../services/BudgetService';
 
 export default function useNewCategory() {
   const navigation = useNavigation();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [budget, setBudget] = useState('');
   const [type, setType] = useState<'INCOME' | 'EXPENSE'>('EXPENSE');
   const [selectedEmoji, setSelectedEmoji] = useState('📁');
 
@@ -25,20 +23,13 @@ export default function useNewCategory() {
         type: type, // Ahora TS sabe que es 'INCOME' | 'EXPENSE'
         icon: selectedEmoji || '📁'
       };
-      const createdCategory = await CategoryService.createCategory(catPayload);
-
-      // 2. Si el usuario definió un presupuesto (solo para gastos), crearlo en Goals
-      if (type === 'EXPENSE' && budget && parseFloat(budget) > 0) {
-        await BudgetService.createOrUpdateBudget({
-          categoryId: createdCategory.id,
-          amount: parseFloat(budget)
-        });
-      }
+      await CategoryService.createCategory(catPayload);
 
       Alert.alert('✅ ¡Éxito!', 'Categoría creada correctamente.', [
         { text: 'OK', onPress: () => navigation.goBack() }
       ]);
     } catch (error: any) {
+      console.error(error);
       Alert.alert('Error', error.response?.data?.message || 'No se pudo crear la categoría.');
     }
   };
@@ -53,7 +44,6 @@ export default function useNewCategory() {
     selectedType: type,
     setSelectedType: setType,
     selectedEmoji, setSelectedEmoji,
-    budget, setBudget,
     handleCreate, handleCancel
   };
 }
