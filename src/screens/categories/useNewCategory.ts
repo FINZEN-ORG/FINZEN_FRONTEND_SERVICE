@@ -9,7 +9,7 @@ export default function useNewCategory() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [budget, setBudget] = useState('');
-  const [selectedType, setSelectedType] = useState('');
+  const [type, setType] = useState<'INCOME' | 'EXPENSE'>('EXPENSE');
   const [selectedEmoji, setSelectedEmoji] = useState('📁');
 
   const handleCreate = async () => {
@@ -22,13 +22,13 @@ export default function useNewCategory() {
       // 1. Crear Categoría en Transactions
       const catPayload = {
         name: name.trim(),
-        type: selectedType,
+        type: type, // Ahora TS sabe que es 'INCOME' | 'EXPENSE'
         icon: selectedEmoji || '📁'
       };
       const createdCategory = await CategoryService.createCategory(catPayload);
 
-      // 2. Si el usuario definió un presupuesto, crearlo en Goals vinculado a la categoría
-      if (budget && parseFloat(budget) > 0) {
+      // 2. Si el usuario definió un presupuesto (solo para gastos), crearlo en Goals
+      if (type === 'EXPENSE' && budget && parseFloat(budget) > 0) {
         await BudgetService.createOrUpdateBudget({
           categoryId: createdCategory.id,
           amount: parseFloat(budget)
@@ -50,7 +50,8 @@ export default function useNewCategory() {
   return {
     name, setName,
     description, setDescription,
-    selectedType, setSelectedType,
+    selectedType: type,
+    setSelectedType: setType,
     selectedEmoji, setSelectedEmoji,
     budget, setBudget,
     handleCreate, handleCancel

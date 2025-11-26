@@ -1,9 +1,5 @@
 // Paleta Finzen actualizada
-// Colores proporcionados: #eafff2, #A9F8C4, #00C66D, #008942, #00481c
-
-// Paleta Finzen actualizada
 // Colores proporcionados: #EAFFF2, #e4ffed, #cdfedc, #a9f8c4, #30e88c, #5fdc93, #00c66d, #00A654, #008942, #00662d, #00481c
-
 export const colors = {
   // Full palette array (top -> bottom as provided)
   paletteArray: [
@@ -63,6 +59,23 @@ export const colors = {
   // UI helpers
   overlay: 'rgba(0,0,0,0.5)',
   shadow: 'rgba(4, 72, 28, 0.12)',
+
+  // --- AGREGADOS PARA CORREGIR ERRORES TS ---
+  // Usado en tarjetas y fondos secundarios (gris muy claro)
+  backgroundSecondary: '#F7F8F7',
+  // Usado en textos sobre fondos oscuros
+  textWhite: '#FFFFFF',
+  // Usado en inputs o textos deshabilitados (gris suave)
+  textLight: '#999999',
+  // El color morado que se ve en tus capturas (Balance Card)
+  secondary: '#6C5CE7',
+  // Objeto requerido por AIMessage
+  aiMessages: {
+    emergency: '#E74C3C', // Rojo error
+    regular: '#FFD93D',   // Amarillo advertencia
+    good: '#00c66d',      // Tu verde primario
+    info: '#6C5CE7'       // Morado info
+  }
 };
 
 export default colors;

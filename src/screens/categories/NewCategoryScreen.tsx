@@ -17,8 +17,8 @@ const NewCategoryScreen: React.FC = () => {
     setDescription,
     selectedEmoji,
     setSelectedEmoji,
-    type,
-    setType,
+    selectedType,
+    setSelectedType,
     budget,
     setBudget,
     handleCreate,
@@ -43,16 +43,16 @@ const NewCategoryScreen: React.FC = () => {
           style={{
             flex: 1,
             padding: 10,
-            backgroundColor: type === 'EXPENSE' ? 'white' : 'transparent',
+            backgroundColor: selectedType === 'EXPENSE' ? 'white' : 'transparent',
             borderRadius: 8,
             alignItems: 'center',
           }}
-          onPress={() => setType('EXPENSE')}
+          onPress={() => setSelectedType('EXPENSE')}
         >
           <Text
             style={{
               fontWeight: 'bold',
-              color: type === 'EXPENSE' ? 'black' : '#666',
+              color: selectedType === 'EXPENSE' ? 'black' : '#666',
             }}
           >
             Gasto 💸
@@ -62,16 +62,16 @@ const NewCategoryScreen: React.FC = () => {
           style={{
             flex: 1,
             padding: 10,
-            backgroundColor: type === 'INCOME' ? 'white' : 'transparent',
+            backgroundColor: selectedType === 'INCOME' ? 'white' : 'transparent',
             borderRadius: 8,
             alignItems: 'center',
           }}
-          onPress={() => setType('INCOME')}
+          onPress={() => setSelectedType('INCOME')}
         >
           <Text
             style={{
               fontWeight: 'bold',
-              color: type === 'INCOME' ? 'black' : '#666',
+              color: selectedType === 'INCOME' ? 'black' : '#666',
             }}
           >
             Ingreso 💰
@@ -114,7 +114,7 @@ const NewCategoryScreen: React.FC = () => {
                 setSelectedEmoji(''); // Permite borrar
               }
             }}
-            maxLength={2} // Algunos emojis ocupan 2 espacios
+            // maxLength={2} se quita a veces para evitar bugs con emojis complejos, mejor controlar en onChangeText
             placeholder="😀"
           />
         </View>
@@ -126,7 +126,7 @@ const NewCategoryScreen: React.FC = () => {
       <Text style={styles.label}>Nombre</Text>
       <TextInput
         style={styles.input}
-        placeholder={type === 'EXPENSE' ? 'Ej: Cervezas' : 'Ej: Freelance'}
+        placeholder={selectedType === 'EXPENSE' ? 'Ej: Cervezas' : 'Ej: Freelance'}
         value={name}
         onChangeText={setName}
       />
@@ -139,34 +139,31 @@ const NewCategoryScreen: React.FC = () => {
         onChangeText={setDescription}
       />
 
-      <Text style={styles.label}>
-        Establecer un presupuesto inicial (Opcional)
-      </Text>
-      <TextInput
-        style={styles.input}
-        placeholder="$0.00"
-        value={budget}
-        onChangeText={setBudget}
-        keyboardType="numeric"
-      />
-
-      <View style={styles.aiBox}>
-        <Text style={styles.aiTitle}>Sugerencias de la IA</Text>
-        <Text style={styles.aiText}>
-          Según tus ingresos, te recomendamos este presupuesto para mantener tus
-          finanzas equilibradas:
-        </Text>
-        <Text style={styles.aiAmount}>$200.000</Text>
-      </View>
+      {/* El presupuesto solo tiene sentido para Gastos */}
+      {selectedType === 'EXPENSE' && (
+          <>
+              <Text style={styles.label}>Presupuesto Inicial (Opcional)</Text>
+              <TextInput
+                  style={styles.input}
+                  placeholder="$0.00"
+                  value={budget}
+                  onChangeText={setBudget}
+                  keyboardType="numeric"
+              />
+              <View style={styles.aiBox}>
+                  <Text style={styles.aiTitle}>Tip FinZen</Text>
+                  <Text style={styles.aiText}>
+                      Asignar un presupuesto te ayuda a controlar esta categoría desde el primer día.
+                  </Text>
+              </View>
+          </>
+      )}
 
       <TouchableOpacity style={styles.primaryBtn} onPress={handleCreate}>
         <Text style={styles.primaryBtnText}>Crear Categoría</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.secondaryBtn}
-        onPress={() => handleCancel()}
-      >
+      <TouchableOpacity style={styles.secondaryBtn} onPress={() => handleCancel()}>
         <Text style={styles.secondaryBtnText}>Cancelar</Text>
       </TouchableOpacity>
     </ScrollView>
