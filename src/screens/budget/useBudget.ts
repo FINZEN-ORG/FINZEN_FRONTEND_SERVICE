@@ -52,6 +52,7 @@ export default function useBudget() {
 
             return {
                 id: b.id,
+                categoryId: b.categoryId,
                 title: catName,
                 icon: catIcon,
                 limit: b.amount,

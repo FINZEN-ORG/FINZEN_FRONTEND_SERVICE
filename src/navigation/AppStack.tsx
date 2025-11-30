@@ -1,12 +1,12 @@
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import { AppStackParamList } from "../types";
-
 import TabNavigator from "../components/TabNavigator/TabNavigator";
 import AddExpenseScreen from "../screens/expenses/AddExpenseScreen";
 import AddIncomeScreen from "../screens/income/AddIncomeScreen";
 import NewCategoryScreen from "../screens/categories/NewCategoryScreen";
 import NewBudgetScreen from "../screens/budget/NewBudgetScreen";
+import BudgetDetailScreen from "../screens/budget/BudgetDetailScreen.tsx";
 
 const Stack = createStackNavigator<AppStackParamList>();
 
@@ -23,6 +23,7 @@ export default function AppStack() {
       <Stack.Screen name="AddIncome" component={AddIncomeScreen} />
       <Stack.Screen name="NewCategory" component={NewCategoryScreen} />
       <Stack.Screen name="NewBudget" component={NewBudgetScreen} />
+      <Stack.Screen name="BudgetDetail" component={BudgetDetailScreen} />
       {/* Futuras pantallas que necesiten stack navigation */}
       {/* <Stack.Screen name="Profile" component={ProfileScreen} /> */}
       {/* <Stack.Screen name="Settings" component={SettingsScreen} /> */}

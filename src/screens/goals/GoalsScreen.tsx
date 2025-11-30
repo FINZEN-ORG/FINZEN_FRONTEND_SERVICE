@@ -1,7 +1,16 @@
-import React, { useState, useCallback } from 'react';
-import { Modal, TextInput, View, Text, TouchableOpacity, FlatList, Alert, ActivityIndicator } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Modal,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import GoalService, { GoalDto, GoalCategory } from '../../services/GoalService';
+import GoalService, { GoalCategory, GoalDto } from '../../services/GoalService';
 import { globalStyles } from '../../styles';
 import { ScreenTitle } from '../../components';
 import { colors } from '../../styles/colors';
@@ -25,7 +34,7 @@ const GoalsScreen: React.FC = () => {
       const data = await GoalService.getAllGoals();
       setGoals(data);
     } catch (error) {
-      console.error("Error loading goals:", error);
+      console.error('Error loading goals:', error);
     } finally {
       setLoading(false);
     }
@@ -61,16 +70,19 @@ const GoalsScreen: React.FC = () => {
     try {
       if (mode === 'deposit') {
         await GoalService.deposit(selectedGoal.id!, parseFloat(amount));
-        Alert.alert("¡Éxito!", "Abono realizado correctamente.");
+        Alert.alert('¡Éxito!', 'Abono realizado correctamente.');
       } else {
         await GoalService.withdraw(selectedGoal.id!, parseFloat(amount));
-        Alert.alert("¡Éxito!", "Retiro realizado correctamente.");
+        Alert.alert('¡Éxito!', 'Retiro realizado correctamente.');
       }
       setModalVisible(false);
       setAmount('');
       loadGoals(); // Recargar lista
     } catch (error: any) {
-      Alert.alert("Error", error.message || "No se pudo procesar la transacción.");
+      Alert.alert(
+        'Error',
+        error.message || 'No se pudo procesar la transacción.',
+      );
     }
   };
 
@@ -82,9 +94,11 @@ const GoalsScreen: React.FC = () => {
 
   if (loading) {
     return (
-        <View style={[globalStyles.screenContainer, {justifyContent:'center'}]}>
-          <ActivityIndicator size="large" color={colors.primary} />
-        </View>
+      <View
+        style={[globalStyles.screenContainer, { justifyContent: 'center' }]}
+      >
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
     );
   }
 

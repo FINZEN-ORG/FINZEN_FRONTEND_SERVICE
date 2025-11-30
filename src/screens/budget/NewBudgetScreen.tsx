@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, FlatList, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { HeaderWithBack } from '../../components';
 import { globalStyles } from '../../styles';
@@ -48,73 +48,71 @@ const NewBudgetScreen: React.FC = () => {
         }
     };
 
+    // Renderizado de cada item de la grilla
+    const renderCategoryItem = ({ item }: { item: any }) => (
+        <TouchableOpacity
+            onPress={() => setSelectedCategoryId(item.id)}
+            style={{
+                flex: 1, margin: 5, aspectRatio: 1,
+                backgroundColor: selectedCategoryId === item.id ? colors.backgroundLight : 'white',
+                borderColor: selectedCategoryId === item.id ? colors.primary : colors.border,
+                borderWidth: 2, borderRadius: 12,
+                justifyContent: 'center', alignItems: 'center', elevation: 2
+            }}
+        >
+            <Text style={{ fontSize: 24, fontFamily: 'System' }}>{item.icon || '📦'}</Text>
+            <Text style={{ fontSize: 12, textAlign: 'center', marginTop: 5 }} numberOfLines={1}>{item.name}</Text>
+        </TouchableOpacity>
+    );
+
     return (
         <View style={globalStyles.screenContainer}>
             <HeaderWithBack title="Nuevo Presupuesto" onBackPress={() => navigation.goBack()} />
-            <ScrollView contentContainerStyle={{ padding: 20 }}>
-                <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 10, color: colors.textPrimary }}>
-                    1. Elige una categoría
-                </Text>
-                <View style={{ height: 250 }}>
-                    {categories.length === 0 ? (
-                        <Text style={{ color: '#888', fontStyle: 'italic' }}>
-                            No tienes categorías de gasto. Ve a "Crear Categoría" primero.
+
+            <FlatList
+                data={categories}
+                keyExtractor={(item) => item.id.toString()}
+                numColumns={3}
+                renderItem={renderCategoryItem}
+                contentContainerStyle={{ padding: 20 }}
+
+                // HEADER: Título y etiquetas
+                ListHeaderComponent={
+                    <View style={{ marginBottom: 15 }}>
+                        <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 10, color: colors.textPrimary }}>
+                            1. Elige una categoría
                         </Text>
-                    ) : (
-                        <FlatList
-                            data={categories}
-                            nestedScrollEnabled
-                            keyExtractor={(item) => item.id.toString()}
-                            numColumns={3}
-                            renderItem={({ item }) => (
-                                <TouchableOpacity
-                                    onPress={() => setSelectedCategoryId(item.id)}
-                                    style={{
-                                        width: '30%', margin: '1.5%', aspectRatio: 1,
-                                        backgroundColor: selectedCategoryId === item.id ? colors.backgroundLight : 'white',
-                                        borderColor: selectedCategoryId === item.id ? colors.primary : colors.border,
-                                        borderWidth: 2, borderRadius: 12,
-                                        justifyContent: 'center', alignItems: 'center',
-                                        elevation: 2
-                                    }}
-                                >
-                                    <Text style={{ fontSize: 24 }}>{(item as any).icon || '📦'}</Text>
-                                    <Text style={{ fontSize: 12, textAlign: 'center', marginTop: 5 }} numberOfLines={1}>
-                                        {item.name}
-                                    </Text>
-                                </TouchableOpacity>
-                            )}
+                    </View>
+                }
+
+                // FOOTER: Input de monto y botón
+                ListFooterComponent={
+                    <View style={{ marginTop: 20 }}>
+                        <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 10, color: colors.textPrimary }}>
+                            2. Límite Mensual
+                        </Text>
+                        <TextInput
+                            style={{
+                                backgroundColor: 'white', borderRadius: 10, padding: 15,
+                                fontSize: 18, borderWidth: 1, borderColor: colors.border,
+                                color: colors.textPrimary
+                            }}
+                            placeholder="$0.00" keyboardType="numeric"
+                            value={amount} onChangeText={setAmount}
                         />
-                    )}
-                </View>
-
-                <Text style={{ fontSize: 16, fontWeight: 'bold', marginTop: 20, marginBottom: 10, color: colors.textPrimary }}>
-                    2. Límite Mensual
-                </Text>
-
-                <TextInput
-                    style={{
-                        backgroundColor: 'white', borderRadius: 10, padding: 15,
-                        fontSize: 18, borderWidth: 1, borderColor: colors.border,
-                        color: colors.textPrimary
-                    }}
-                    placeholder="$0.00"
-                    keyboardType="numeric"
-                    value={amount}
-                    onChangeText={setAmount}
-                />
-                <TouchableOpacity
-                    onPress={handleCreate}
-                    style={{
-                        backgroundColor: colors.primary, padding: 15, borderRadius: 30,
-                        marginTop: 30, alignItems: 'center', elevation: 3
-                    }}
-                >
-                    <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18 }}>Crear Presupuesto</Text>
-                </TouchableOpacity>
-            </ScrollView>
+                        <TouchableOpacity
+                            onPress={handleCreate}
+                            style={{
+                                backgroundColor: colors.primary, padding: 15, borderRadius: 30,
+                                marginTop: 30, alignItems: 'center', elevation: 3
+                            }}
+                        >
+                            <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18 }}>Crear Presupuesto</Text>
+                        </TouchableOpacity>
+                    </View>
+                }
+            />
         </View>
     );
 };
-
 export default NewBudgetScreen;

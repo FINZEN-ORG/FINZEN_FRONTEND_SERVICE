@@ -3,7 +3,6 @@ import {View, Text, ActivityIndicator, FlatList, TouchableOpacity} from 'react-n
 import {
     ScreenTitle,
     SectionSubtitle,
-    ExpensesList,
 } from '../../components';
 import {colors, globalStyles} from '../../styles';
 import useBudget from './useBudget';
@@ -11,7 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 
 const BudgetScreen: React.FC = () => {
     const navigation = useNavigation<any>();
-    const { loading, budgets, expenses } = useBudget();
+    const { loading, budgets } = useBudget();
 
     if (loading) {
         return (
@@ -68,45 +67,52 @@ const BudgetScreen: React.FC = () => {
                 showsHorizontalScrollIndicator={false}
                 keyExtractor={(item) => item.id?.toString() || Math.random().toString()}
                 renderItem={({ item }) => (
-                    <View style={{
-                        width: 160,
-                        height: 140,
-                        backgroundColor: 'white',
-                        borderRadius: 12,
-                        padding: 12,
-                        marginRight: 10,
-                        elevation: 2
-                    }}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                            <Text style={{ fontSize: 24 }}>{item.icon}</Text>
-                            <Text style={{ fontWeight: 'bold' }}>${item.limit}</Text>
-                        </View>
-                        <Text style={{ marginTop: 8, fontWeight: '600' }}>{item.title}</Text>
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate('BudgetDetail', {
+                            budgetId: item.id,
+                            categoryId: item.categoryId, // Asegúrate de que tu mapBudgetsToDisplay incluya categoryId
+                            categoryName: item.title,
+                            limit: item.limit,
+                            spent: item.spent
+                        })}
+                    >
+                        <View style={{
+                            width: 160,
+                            height: 140,
+                            backgroundColor: 'white',
+                            borderRadius: 12,
+                            padding: 12,
+                            marginRight: 10,
+                            elevation: 2
+                        }}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                <Text style={{ fontSize: 24 }}>{item.icon}</Text>
+                                <Text style={{ fontWeight: 'bold' }}>${item.limit}</Text>
+                            </View>
+                            <Text style={{ marginTop: 8, fontWeight: '600' }}>{item.title}</Text>
 
-                        <View style={{ marginTop: 15 }}>
-                            <Text style={{ fontSize: 10, color: '#666' }}>Gastado: ${item.spent}</Text>
-                            {/* Barra de progreso simple */}
-                            <View style={{
-                                height: 6,
-                                backgroundColor: '#EEE',
-                                borderRadius: 3,
-                                marginTop: 4
-                            }}>
+                            <View style={{ marginTop: 15 }}>
+                                <Text style={{ fontSize: 10, color: '#666' }}>Gastado: ${item.spent}</Text>
+                                {/* Barra de progreso simple */}
                                 <View style={{
-                                    width: `${Math.min(item.percentage * 100, 100)}%`,
-                                    height: '100%',
-                                    backgroundColor: item.percentage > 1 ? 'red' : item.color,
-                                    borderRadius: 3
-                                }} />
+                                    height: 6,
+                                    backgroundColor: '#EEE',
+                                    borderRadius: 3,
+                                    marginTop: 4
+                                }}>
+                                    <View style={{
+                                        width: `${Math.min(item.percentage * 100, 100)}%`,
+                                        height: '100%',
+                                        backgroundColor: item.percentage > 1 ? 'red' : item.color,
+                                        borderRadius: 3
+                                    }} />
+                                </View>
                             </View>
                         </View>
-                    </View>
+                    </TouchableOpacity>
                 )}
                 contentContainerStyle={{ paddingHorizontal: 5, paddingBottom: 10 }}
             />
-
-            <SectionSubtitle text="Gastos Recientes" marginTop={true} />
-            <ExpensesList expenses={expenses} onExpensePress={() => {}} />
         </View>
     );
 };
