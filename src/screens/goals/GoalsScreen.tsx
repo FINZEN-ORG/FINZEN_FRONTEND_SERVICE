@@ -14,6 +14,7 @@ import GoalService, { GoalCategory, GoalDto } from '../../services/GoalService';
 import { globalStyles } from '../../styles';
 import { ScreenTitle } from '../../components';
 import { colors } from '../../styles/colors';
+import { DatePicker } from '../../components';
 
 const GoalsScreen: React.FC = () => {
   const [goals, setGoals] = useState<GoalDto[]>([]);
@@ -27,6 +28,7 @@ const GoalsScreen: React.FC = () => {
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [newGoalName, setNewGoalName] = useState('');
   const [newGoalTarget, setNewGoalTarget] = useState('');
+  const [newGoalDate, setNewGoalDate] = useState('');
 
   const loadGoals = async () => {
     try {
@@ -47,17 +49,23 @@ const GoalsScreen: React.FC = () => {
   );
 
   const handleCreateGoal = async () => {
-    if (!newGoalName || !newGoalTarget) return;
+    if (!newGoalName || !newGoalTarget || !newGoalDate) {
+        Alert.alert("Atención", "Por favor completa todos los campos, incluyendo la fecha.");
+        return;
+    }
     try {
       await GoalService.createGoal({
         name: newGoalName,
         targetAmount: parseFloat(newGoalTarget),
         category: GoalCategory.OTHER,
         status: 'ACTIVE',
+        description: 'Meta creada desde app',
+        dueDate: newGoalDate
       });
       setCreateModalVisible(false);
       setNewGoalName('');
       setNewGoalTarget('');
+      setNewGoalDate(''); // Limpiar fech
       loadGoals();
       Alert.alert('¡Éxito!', 'Meta creada.');
     } catch (error) {
@@ -94,9 +102,7 @@ const GoalsScreen: React.FC = () => {
 
   if (loading) {
     return (
-      <View
-        style={[globalStyles.screenContainer, { justifyContent: 'center' }]}
-      >
+      <View style={[globalStyles.screenContainer, { justifyContent: 'center' }]}>
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
@@ -164,6 +170,9 @@ const GoalsScreen: React.FC = () => {
                   }}
                 >
                   {item.name}
+                </Text>
+                <Text style={{ fontSize: 12, color: '#999' }}>
+                  {item.dueDate}
                 </Text>
                 <Text
                   style={{
@@ -256,7 +265,7 @@ const GoalsScreen: React.FC = () => {
         }}
       />
 
-      {/* MODAL DE CREACIÓN (NUEVO) */}
+      {/* MODAL DE CREACIÓN ACTUALIZADO */}
       <Modal visible={createModalVisible} transparent animationType="slide">
         <View
           style={{
@@ -300,9 +309,20 @@ const GoalsScreen: React.FC = () => {
                 borderColor: '#DDD',
                 borderRadius: 8,
                 padding: 10,
-                marginBottom: 20,
+                marginBottom: 15,
               }}
             />
+
+            {/* 5. AGREGAR DATEPICKER */}
+            <Text style={{ marginBottom: 5 }}>Fecha Límite</Text>
+            <View style={{ marginBottom: 20 }}>
+              <DatePicker
+                value={newGoalDate}
+                onDateChange={setNewGoalDate}
+                placeholder="Seleccionar fecha objetivo"
+                format="YYYY-MM-DD" // IMPORTANTE: Formato ISO para el backend Java
+              />
+            </View>
 
             <View
               style={{
