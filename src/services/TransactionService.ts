@@ -73,7 +73,7 @@ class TransactionService {
     // GET /api/transactions - Obtiene todas las transacciones
     static async getAllTransactions(): Promise<TransactionResponse[]> {
         const headers = await this.getAuthHeader();
-    const url = `${TRANSACTIONS_API_BASE_URL}/transactions`;
+        const url = `${TRANSACTIONS_API_BASE_URL}/transactions`;
         const response = await axios.get(url, { headers });
         return response.data;
     }
@@ -81,21 +81,21 @@ class TransactionService {
     // DELETE /api/transactions/incomes/:id - Eliminar ingreso
     static async deleteIncome(id: number): Promise<void> {
         const headers = await this.getAuthHeader();
-    const url = `${TRANSACTIONS_API_BASE_URL}/transactions/incomes/${id}`;
+        const url = `${TRANSACTIONS_API_BASE_URL}/transactions/incomes/${id}`;
         await axios.delete(url, { headers });
     }
 
     // DELETE /api/transactions/expenses/:id - Eliminar gasto
     static async deleteExpense(id: number): Promise<void> {
         const headers = await this.getAuthHeader();
-    const url = `${TRANSACTIONS_API_BASE_URL}/transactions/expenses/${id}`;
+        const url = `${TRANSACTIONS_API_BASE_URL}/transactions/expenses/${id}`;
         await axios.delete(url, { headers });
     }
 
     // GET /api/transactions/reports - Obtener reportes
     static async getReports(): Promise<ReportsResponse> {
         const headers = await this.getAuthHeader();
-    const url = `${TRANSACTIONS_API_BASE_URL}/transactions/reports`;
+        const url = `${TRANSACTIONS_API_BASE_URL}/transactions/reports`;
         const response = await axios.get(url, { headers });
         return response.data;
     }

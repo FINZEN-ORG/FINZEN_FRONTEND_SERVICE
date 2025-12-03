@@ -20,6 +20,7 @@ export type AppStackParamList = {
   AddIncome: undefined;
   NewBudget: undefined;
   BudgetDetail: undefined;
+  GoalDetail: { goalId: number };
   // Futuras pantallas autenticadas
   // Profile: undefined;
   // Settings: undefined;

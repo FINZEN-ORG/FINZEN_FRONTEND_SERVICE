@@ -31,6 +31,20 @@ class BudgetService {
         const response = await axios.post(url, data, { headers });
         return response.data;
     }
+
+    static async deleteBudget(id: number): Promise<BudgetDto> {
+        const headers = await this.getAuthHeader();
+        const url = `${GOALS_API_BASE_URL}/budgets/${id}`;
+        const response = await axios.delete(url, { headers });
+        return response.data;
+    }
+
+    static async updateBudget(id: number, data: BudgetDto): Promise<BudgetDto> {
+        const headers = await this.getAuthHeader();
+        const url = `${GOALS_API_BASE_URL}/budgets/${id}`;
+        const response = await axios.put(url, data, { headers });
+        return response.data;
+    }
 }
 
 export default BudgetService;

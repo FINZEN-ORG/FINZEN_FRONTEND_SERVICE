@@ -24,6 +24,15 @@ export interface GoalDto {
     dueDate?: string;
 }
 
+export interface GoalTransactionDto {
+    id: number;
+    goalId: number;
+    amount: number;
+    type: 'DEPOSIT' | 'WITHDRAW';
+    description: string;
+    date: string;
+}
+
 class GoalService {
     static async getAuthHeader() {
         const token = await AsyncStorage.getItem("jwt");
@@ -45,7 +54,19 @@ class GoalService {
         return response.data;
     }
 
-    // Lógica de Alcancía
+    static async updateGoal(id: number, data: GoalDto): Promise<GoalDto> {
+        const headers = await this.getAuthHeader();
+        const url = `${GOALS_API_BASE_URL}/goals/${id}`;
+        const response = await axios.put(url, data, { headers });
+        return response.data;
+    }
+
+    static async deleteGoal(id: number): Promise<void> {
+        const headers = await this.getAuthHeader();
+        const url = `${GOALS_API_BASE_URL}/goals/${id}`;
+        await axios.delete(url, { headers });
+    }
+
     static async deposit(id: number, amount: number): Promise<GoalDto> {
         const headers = await this.getAuthHeader();
         const url = `${GOALS_API_BASE_URL}/goals/${id}/deposit`;
@@ -59,5 +80,13 @@ class GoalService {
         const response = await axios.post(url, { amount }, { headers });
         return response.data;
     }
+
+    static async getHistory(id: number): Promise<GoalTransactionDto[]> {
+        const headers = await this.getAuthHeader();
+        const url = `${GOALS_API_BASE_URL}/goals/${id}/history`;
+        const response = await axios.get(url, { headers });
+        return response.data;
+    }
 }
+
 export default GoalService;

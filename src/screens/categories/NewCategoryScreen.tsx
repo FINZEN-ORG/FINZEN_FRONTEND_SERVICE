@@ -40,7 +40,8 @@ const NewCategoryScreen: React.FC = () => {
           style={{
             flex: 1,
             padding: 10,
-            backgroundColor: selectedType === 'EXPENSE' ? 'white' : 'transparent',
+            backgroundColor:
+              selectedType === 'EXPENSE' ? 'white' : 'transparent',
             borderRadius: 8,
             alignItems: 'center',
           }}
@@ -59,7 +60,8 @@ const NewCategoryScreen: React.FC = () => {
           style={{
             flex: 1,
             padding: 10,
-            backgroundColor: selectedType === 'INCOME' ? 'white' : 'transparent',
+            backgroundColor:
+              selectedType === 'INCOME' ? 'white' : 'transparent',
             borderRadius: 8,
             alignItems: 'center',
           }}
@@ -98,22 +100,22 @@ const NewCategoryScreen: React.FC = () => {
               padding: 0,
               width: '100%',
               height: '100%',
-              fontFamily: 'System',
-              color: '#000000'
+              fontFamily: 'System', // Importante para Android
+              color: '#000000',
             }}
             value={selectedEmoji}
             onChangeText={text => {
-              // Truco: Solo permitimos el último caracter ingresado (para reemplazar el anterior)
-              // o validamos que sea un emoji (opcional, pero complejo).
-              // Para simplificar: Tomamos el último caracter si escribe más de uno.
               if (text.length > 0) {
-                const lastChar = text.slice(-1); // O usa una librería como 'grapheme-splitter' para emojis compuestos, pero slice suele bastar.
+                // CORRECCIÓN MAGISTRAL:
+                // Usamos el spread operator [...] para dividir correctamente emojis complejos
+                // text.slice(-1) rompe los emojis de 4 bytes. [...text] no.
+                const chars = [...text];
+                const lastChar = chars[chars.length - 1];
                 setSelectedEmoji(lastChar);
               } else {
-                setSelectedEmoji(''); // Permite borrar
+                setSelectedEmoji('');
               }
             }}
-            // maxLength={2} se quita a veces para evitar bugs con emojis complejos, mejor controlar en onChangeText
             placeholder="😀"
           />
         </View>
@@ -125,7 +127,9 @@ const NewCategoryScreen: React.FC = () => {
       <Text style={styles.label}>Nombre</Text>
       <TextInput
         style={styles.input}
-        placeholder={selectedType === 'EXPENSE' ? 'Ej: Cervezas' : 'Ej: Freelance'}
+        placeholder={
+          selectedType === 'EXPENSE' ? 'Ej: Cervezas' : 'Ej: Freelance'
+        }
         value={name}
         onChangeText={setName}
       />
@@ -142,7 +146,10 @@ const NewCategoryScreen: React.FC = () => {
         <Text style={styles.primaryBtnText}>Crear Categoría</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.secondaryBtn} onPress={() => handleCancel()}>
+      <TouchableOpacity
+        style={styles.secondaryBtn}
+        onPress={() => handleCancel()}
+      >
         <Text style={styles.secondaryBtnText}>Cancelar</Text>
       </TouchableOpacity>
     </ScrollView>

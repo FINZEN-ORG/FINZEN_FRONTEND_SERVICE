@@ -37,5 +37,12 @@ class CategoryService {
         const response = await axios.post(url, data, { headers });
         return response.data;
     }
+
+    static async deleteCategory(id: number): Promise<CategoryDto> {
+        const headers = await this.getAuthHeader();
+        const url = `${TRANSACTIONS_API_BASE_URL}/categories/${id}`;
+        const response = await axios.delete(url, { headers });
+        return response.data;
+    }
 }
 export default CategoryService;
