@@ -1,12 +1,12 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { TRANSACTIONS_API_BASE_URL } from "@env";
+import { GOALS_API_BASE_URL } from "@env";
 
 export interface BudgetDto {
     id?: number;
-    categoryId: number;
-    amount: number;
-    initialAmount: number;
+    categoryId: number; // ID de categoría de transacciones
+    amount: number;     // Límite mensual
+    spent?: number;     // Viene del backend calculado (API Composition)
     startDate?: string;
     endDate?: string;
 }
@@ -18,21 +18,31 @@ class BudgetService {
         return { Authorization: `Bearer ${token}` };
     }
 
-    // GET /api/budgets - Obtener todos los presupuestos
     static async getAllBudgets(): Promise<BudgetDto[]> {
         const headers = await this.getAuthHeader();
-        const url = `${TRANSACTIONS_API_BASE_URL}/budgets`;
-        console.log('📥 Fetching budgets from:', url);
+        const url = `${GOALS_API_BASE_URL}/budgets`;
         const response = await axios.get(url, { headers });
         return response.data;
     }
 
-    // POST /api/budgets - Crear o actualizar presupuesto
     static async createOrUpdateBudget(data: BudgetDto): Promise<BudgetDto> {
         const headers = await this.getAuthHeader();
-        const url = `${TRANSACTIONS_API_BASE_URL}/budgets`;
-        console.log('📤 Creating/updating budget:', data);
+        const url = `${GOALS_API_BASE_URL}/budgets`;
         const response = await axios.post(url, data, { headers });
+        return response.data;
+    }
+
+    static async deleteBudget(id: number): Promise<BudgetDto> {
+        const headers = await this.getAuthHeader();
+        const url = `${GOALS_API_BASE_URL}/budgets/${id}`;
+        const response = await axios.delete(url, { headers });
+        return response.data;
+    }
+
+    static async updateBudget(id: number, data: BudgetDto): Promise<BudgetDto> {
+        const headers = await this.getAuthHeader();
+        const url = `${GOALS_API_BASE_URL}/budgets/${id}`;
+        const response = await axios.put(url, data, { headers });
         return response.data;
     }
 }

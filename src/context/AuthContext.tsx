@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
 import AuthService, { User } from '../services/AuthService';
 
 // Types for the context
@@ -83,16 +83,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   // Login function
-  const login = (userData: User, newToken?: string | null) => {
+  const login = useCallback((userData: User, newToken?: string | null) => {
     setUser(userData);
     setIsAuthenticated(true);
     if (newToken !== undefined) {
       setToken(newToken);
     }
-  };
+  }, []);
 
   // Logout function
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       setIsLoading(true);
       await AuthService.logout();
@@ -108,20 +108,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const value: AuthContextType = {
-    user,
-    isLoading,
-    isAuthenticated,
-    login,
-    logout,
-    checkAuthStatus,
-  };
-
-  // Include token in the provided value by casting to any to avoid changing the exported type shape
-  // (we updated the AuthContextType above to include token in login signature but not as top-level field)
-  (value as any).token = token;
+  const value = useMemo(() => {
+    const v: any = {
+      user,
+      isLoading,
+      isAuthenticated,
+      login,
+      logout,
+      checkAuthStatus,
+    };
+    v.token = token; // attach token without changing AuthContextType
+    return v as AuthContextType;
+  }, [user, isLoading, isAuthenticated, login, logout, checkAuthStatus, token]);
 
   return (
     <AuthContext.Provider value={value}>

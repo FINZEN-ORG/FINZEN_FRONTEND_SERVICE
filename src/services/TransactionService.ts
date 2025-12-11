@@ -2,6 +2,11 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { TRANSACTIONS_API_BASE_URL } from "@env";
 
+export interface CategoryTotalDto {
+    categoryId: number;
+    totalAmount: number;
+}
+
 export interface TransactionRequest {
     amount: number;
     description: string;
@@ -69,7 +74,6 @@ class TransactionService {
     static async getAllTransactions(): Promise<TransactionResponse[]> {
         const headers = await this.getAuthHeader();
         const url = `${TRANSACTIONS_API_BASE_URL}/transactions`;
-        console.log('Fetching all transactions from:', url);
         const response = await axios.get(url, { headers });
         return response.data;
     }
@@ -78,7 +82,6 @@ class TransactionService {
     static async deleteIncome(id: number): Promise<void> {
         const headers = await this.getAuthHeader();
         const url = `${TRANSACTIONS_API_BASE_URL}/transactions/incomes/${id}`;
-        console.log('Deleting income:', id);
         await axios.delete(url, { headers });
     }
 
@@ -86,7 +89,6 @@ class TransactionService {
     static async deleteExpense(id: number): Promise<void> {
         const headers = await this.getAuthHeader();
         const url = `${TRANSACTIONS_API_BASE_URL}/transactions/expenses/${id}`;
-        console.log('Deleting expense:', id);
         await axios.delete(url, { headers });
     }
 
@@ -94,8 +96,18 @@ class TransactionService {
     static async getReports(): Promise<ReportsResponse> {
         const headers = await this.getAuthHeader();
         const url = `${TRANSACTIONS_API_BASE_URL}/transactions/reports`;
-        console.log('Fetching reports from:', url);
         const response = await axios.get(url, { headers });
+        return response.data;
+    }
+
+    // NUEVO: Endpoint para reportes de categorías (usado internamente por GoalService, pero útil tenerlo)
+    static async getCategorySummary(startDate: string, endDate: string): Promise<CategoryTotalDto[]> {
+        const headers = await this.getAuthHeader();
+        const url = `${TRANSACTIONS_API_BASE_URL}/transactions/summary`;
+        const response = await axios.get(url, {
+            headers,
+            params: { startDate, endDate }
+        });
         return response.data;
     }
 }

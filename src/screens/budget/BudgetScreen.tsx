@@ -1,138 +1,18 @@
-import React, { useState, useCallback } from 'react';
-import { View, ActivityIndicator } from 'react-native';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { AppStackParamList } from '../../types/navigation';
-import {
-    ScreenTitle,
-    SectionSubtitle,
-    CategoriesSection,
-    ExpensesList,
-    FloatingActionButton
-} from '../../components';
-import AIMessage, { MessageType } from '../../components/AIMessage';
-import { globalStyles } from '../../styles';
-import CategoryService, { CategoryDto } from '../../services/CategoryService';
-import TransactionService, { TransactionResponse } from '../../services/TransactionService';
-
-// ✅ Mapeo de categorías a emojis
-const CATEGORY_EMOJIS: { [key: string]: string } = {
-    'Food': '🍔',
-    'Transport': '⛽',
-    'Entertainment': '🎬',
-    'Health': '🏥',
-    'Housing': '🏠',
-    'Salary': '💼',
-    'Other': '📦',
-    // Nombres en español (por si cambian)
-    'Comida': '🍔',
-    'Transporte': '⛽',
-    'Entretenimiento': '🎬',
-    'Salud': '🏥',
-    'Vivienda': '🏠',
-    'Salario': '💼',
-    'Otro': '📦',
-    'Educación': '📚',
-    'Servicios y Facturas': '💡',
-    'Ropa y Accesorios': '👕',
-    'Compras': '🛒',
-    'Inversiones': '📈',
-    'Regalos': '🎁',
-    'Reembolsos': '💰',
-    'Ventas': '🛍️',
-    'Alquiler': '🏠',
-    'Freelance': '🧾',
-    'Otros': '📜',
-};
+import React from 'react';
+import { View, Text, ActivityIndicator, FlatList, TouchableOpacity, Dimensions } from 'react-native';
+import { ScreenTitle } from '../../components';
+import { colors, globalStyles } from '../../styles';
+import useBudget from './useBudget';
+import { useNavigation } from '@react-navigation/native';
+// Cálculos para el Grid de 2 columnas
+const { width } = Dimensions.get('window');
+const CARD_MARGIN = 6;
+// (Ancho Pantalla - Padding Contenedor (aprox 20) - Márgenes entre items) / 2
+const CARD_WIDTH = (width - 40) / 2 - CARD_MARGIN;
 
 const BudgetScreen: React.FC = () => {
-    const navigation = useNavigation<StackNavigationProp<AppStackParamList>>();
-    const [showFloatingMenu, setShowFloatingMenu] = useState(false);
-    const [categories, setCategories] = useState<CategoryDto[]>([]);
-    const [expenses, setExpenses] = useState<TransactionResponse[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useFocusEffect(
-        useCallback(() => {
-            loadData();
-        }, [])
-    );
-
-    const loadData = async () => {
-        try {
-            setLoading(true);
-            const [categoriesData, transactionsData] = await Promise.all([
-                CategoryService.getAllCategories(),
-                TransactionService.getAllTransactions()
-            ]);
-
-            setCategories(categoriesData);
-
-            // Filtrar solo gastos
-            const expensesData = transactionsData.filter(t => t.type === 'EXPENSE');
-            setExpenses(expensesData);
-
-            console.log('✅ Budget screen data loaded');
-        } catch (error) {
-            console.error('❌ Error loading budget data:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // ✅ Función para convertir CategoryDto al formato esperado por CategoriesSection
-    const mapCategoriesToDisplay = () => {
-        return categories.map(cat => ({
-            id: cat.id,
-            logo: CATEGORY_EMOJIS[cat.name] || '📦', // Emoji por defecto si no existe
-            title: cat.name
-        }));
-    };
-
-    // ✅ Función para convertir TransactionResponse al formato esperado por ExpensesList
-    const mapExpensesToDisplay = () => {
-        return expenses.map(expense => {
-            // Buscar la categoría correspondiente
-            const category = categories.find(c => c.id === expense.categoryId);
-            const categoryName = category?.name || 'Other';
-
-            return {
-                id: expense.id,
-                categoryIcon: CATEGORY_EMOJIS[categoryName] || '📦',
-                description: expense.description,
-                amount: expense.amount,
-                date: new Date(expense.date).toISOString().split('T')[0], // Formato YYYY-MM-DD
-                category: categoryName.toLowerCase()
-            };
-        });
-    };
-
-    const handleCategoryPress = (categoryId: number, title: string) => {
-        console.log(`Presionaste: ${title} (ID: ${categoryId})`);
-    };
-
-    const handleExpensePress = (expenseId: number, description: string) => {
-        console.log(`Presionaste gasto: ${description} (ID: ${expenseId})`);
-    };
-
-    const toggleFloatingMenu = () => {
-        setShowFloatingMenu(!showFloatingMenu);
-    };
-
-    const handleAddExpense = () => {
-        setShowFloatingMenu(false);
-        navigation.navigate('AddExpense');
-    };
-
-    const handleAddIncome = () => {
-        setShowFloatingMenu(false);
-        navigation.navigate('AddIncome');
-    };
-
-    const handleCreateCategory = () => {
-        setShowFloatingMenu(false);
-        navigation.navigate('NewCategory');
-    };
+    const navigation = useNavigation<any>();
+    const { loading, budgets } = useBudget();
 
     if (loading) {
         return (
@@ -142,44 +22,126 @@ const BudgetScreen: React.FC = () => {
         );
     }
 
+    // Componente de Cabecera (Se renderiza dentro del FlatList para evitar errores de scroll anidado)
+    const renderHeader = () => (
+        <View style={{ marginBottom: 10 }}>
+            <ScreenTitle title="Presupuesto" subtitle="Controla tus límites mensuales" />
+
+            {/* BOTONES DE ACCIÓN PRINCIPALES */}
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 25 }}>
+
+                {/* Opción A: Crear Categoría (Suelta) */}
+                <TouchableOpacity
+                    onPress={() => navigation.navigate('NewCategory')}
+                    style={{
+                        flex: 0.48, backgroundColor: colors.backgroundLightest,
+                        padding: 15, borderRadius: 12, alignItems: 'center',
+                        borderWidth: 1, borderColor: colors.border
+                    }}
+                >
+                    <Text style={{ fontSize: 24 }}>🏷️</Text>
+                    <Text style={{ color: colors.primaryDark, fontWeight: 'bold', marginTop: 5 }}>
+                        Nueva Categoría
+                    </Text>
+                </TouchableOpacity>
+
+                {/* Opción B: Crear Presupuesto (Asociar categoría a monto) */}
+                <TouchableOpacity
+                    onPress={() => navigation.navigate('NewBudget')}
+                    style={{
+                        flex: 0.48, backgroundColor: '#F0F4FF',
+                        padding: 15, borderRadius: 12, alignItems: 'center',
+                        borderWidth: 1, borderColor: '#E0E0FF'
+                    }}
+                >
+                    <Text style={{ fontSize: 24 }}>📊</Text>
+                    <Text style={{ color: '#6C5CE7', fontWeight: 'bold', marginTop: 5 }}>
+                        Nuevo Presupuesto
+                    </Text>
+                </TouchableOpacity>
+            </View>
+
+            <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.textPrimary, marginBottom: 15, marginLeft: 5 }}>
+                Mis Presupuestos
+            </Text>
+        </View>
+    );
+
+    // Función de renderizado de tarjeta para Grid
+    const renderBudgetItem = ({ item }: { item: any }) => (
+        <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={() => navigation.navigate('BudgetDetail', {
+                budgetId: item.id,
+                categoryId: item.categoryId,
+                categoryName: item.title,
+                limit: item.limit,
+                spent: item.spent
+            })}
+            style={{
+                width: CARD_WIDTH,
+                margin: CARD_MARGIN,
+                backgroundColor: 'white',
+                borderRadius: 16,
+                padding: 12,
+                elevation: 3,
+                shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4,
+                borderTopWidth: 4, borderTopColor: item.percentage > 1 ? colors.expense : item.color
+            }}
+        >
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <Text style={{ fontSize: 22 }}>{item.icon}</Text>
+                <Text style={{ fontSize: 12, fontWeight: 'bold', color: item.percentage > 1 ? colors.expense : colors.textSecondary }}>
+                    {(item.percentage * 100).toFixed(0)}%
+                </Text>
+            </View>
+
+            <Text style={{ fontSize: 14, fontWeight: 'bold', color: colors.textPrimary }} numberOfLines={1}>
+                {item.title}
+            </Text>
+
+            <Text style={{ fontSize: 12, color: colors.textSecondary, marginBottom: 8 }}>
+                ${item.limit.toLocaleString()}
+            </Text>
+
+            {/* Barra Miniatura */}
+            <View style={{ height: 4, backgroundColor: '#EEE', borderRadius: 2, overflow:'hidden' }}>
+                <View style={{
+                    width: `${Math.min(item.percentage * 100, 100)}%`,
+                    height: '100%',
+                    backgroundColor: item.percentage > 1 ? colors.expense : item.color
+                }} />
+            </View>
+
+            <Text style={{ fontSize: 10, color: '#999', marginTop: 4 }}>
+                Gastado: ${item.spent.toLocaleString()}
+            </Text>
+        </TouchableOpacity>
+    );
+
     return (
         <View style={globalStyles.screenContainer}>
-            <ScreenTitle
-                title="Presupuesto"
-                subtitle="Un plan sencillo para lograr grandes metas"
-            />
+            <FlatList
+                data={budgets}
+                keyExtractor={(item) => item.id?.toString() || Math.random().toString()}
 
-            {expenses.length > 0 && (
-                <AIMessage
-                    type={'info' as MessageType}
-                    mensaje={`Has registrado ${expenses.length} gastos este mes`}
-                />
-            )}
+                // HEADER: Aquí va todo lo que estaba antes del FlatList
+                ListHeaderComponent={renderHeader}
 
-            <SectionSubtitle
-                text="Categorías de Gastos"
-                marginTop={true}
-            />
-            <CategoriesSection
-                categories={mapCategoriesToDisplay()} // ✅ Convertir al formato esperado
-                onCategoryPress={handleCategoryPress}
-            />
+                // GRID CONFIG: 2 columnas verticales
+                numColumns={2}
+                columnWrapperStyle={{ justifyContent: 'flex-start' }} // Alineación
+                contentContainerStyle={{ paddingHorizontal: 5, paddingBottom: 100 }}
 
-            <SectionSubtitle
-                text="Gastos Recientes"
-                marginTop={true}
-            />
-            <ExpensesList
-                expenses={mapExpensesToDisplay()} // ✅ Convertir al formato esperado
-                onExpensePress={handleExpensePress}
-            />
+                renderItem={renderBudgetItem}
 
-            <FloatingActionButton
-                isMenuOpen={showFloatingMenu}
-                onToggleMenu={toggleFloatingMenu}
-                onCreateCategory={handleCreateCategory}
-                onAddExpense={handleAddExpense}
-                onAddIncome={handleAddIncome}
+                // Empty State
+                ListEmptyComponent={
+                    <View style={{ alignItems: 'center', marginTop: 50, opacity: 0.6 }}>
+                        <Text style={{ fontSize: 40, marginBottom: 10 }}>📉</Text>
+                        <Text style={{ color: colors.textSecondary }}>No tienes presupuestos activos.</Text>
+                    </View>
+                }
             />
         </View>
     );

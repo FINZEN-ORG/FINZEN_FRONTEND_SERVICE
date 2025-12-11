@@ -1,6 +1,7 @@
 // Types for authentication stack (non-authenticated screens)
 export type AuthStackParamList = {
   Login: undefined;
+  Onboarding?: undefined;
   // Futuras pantallas de autenticación
   // Register: undefined;
   // ForgotPassword: undefined;
@@ -17,6 +18,9 @@ export type AppStackParamList = {
   // Pantallas adicionales que necesiten stack navigation
   AddExpense: undefined;
   AddIncome: undefined;
+  NewBudget: undefined;
+  BudgetDetail: undefined;
+  GoalDetail: { goalId: number };
   // Futuras pantallas autenticadas
   // Profile: undefined;
   // Settings: undefined;
