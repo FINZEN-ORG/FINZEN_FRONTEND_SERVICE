@@ -37,10 +37,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(true);
       // Configure Google Sign In
       AuthService.configureGoogleSignIn();
-      
+
       // Check if user is already authenticated
       const userData = await AuthService.checkAuthStatus();
       const storedToken = await AuthService.getToken();
+
       if (userData) {
         setUser(userData);
         setIsAuthenticated(true);
@@ -65,6 +66,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(true);
       const userData = await AuthService.checkAuthStatus();
       const storedToken = await AuthService.getToken();
+
       if (userData) {
         setUser(userData);
         setIsAuthenticated(true);
@@ -90,12 +92,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (newToken !== undefined) {
       setToken(newToken);
     }
-    // Guardar sessionId único cuando el usuario inicia sesión
+
+    // Guardar sessionId y userId de forma segura (como Strings)
     try {
-      const sessionId = userData.id || userData.email || Date.now().toString();
+      // FIX: Asegurar que convertimos a String para evitar error java.lang.Double
+      const sessionId = String(userData.id || userData.email || Date.now());
+      const userId = String(userData.id || '0');
+
       await AsyncStorage.setItem('@finzen_user_session_id', sessionId);
+      await AsyncStorage.setItem('@finzen_user_id', userId);
+
     } catch (error) {
-      console.error('Error saving session ID:', error);
+      console.error('Error saving session details:', error);
     }
   }, []);
 
@@ -107,13 +115,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(null);
       setIsAuthenticated(false);
       setToken(null);
-      // SOLO limpiar cache del mensaje motivacional y sessionId
-      // NO borrar onboarding ni otros datos del usuario
+
+      // Limpiar datos de sesión
       await AsyncStorage.removeItem('@finzen_motivational_message');
       await AsyncStorage.removeItem('@finzen_user_session_id');
+      await AsyncStorage.removeItem('@finzen_user_id');
     } catch (error) {
       console.error('Error during logout:', error);
-      // Even if logout fails, clear local state
       setUser(null);
       setIsAuthenticated(false);
       throw error;
@@ -131,14 +139,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       logout,
       checkAuthStatus,
     };
-    v.token = token; // attach token without changing AuthContextType
+    v.token = token;
     return v as AuthContextType;
   }, [user, isLoading, isAuthenticated, login, logout, checkAuthStatus, token]);
 
   return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
+      <AuthContext.Provider value={value}>
+        {children}
+      </AuthContext.Provider>
   );
 };
 
@@ -147,9 +155,7 @@ export const useAuth = (): AuthContextType => {
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
-  
   return context;
 };
 
-// Export the context for advanced usage if needed
 export { AuthContext };
