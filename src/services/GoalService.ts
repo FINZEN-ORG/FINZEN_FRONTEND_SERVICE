@@ -50,6 +50,9 @@ class GoalService {
     static async createGoal(data: GoalDto): Promise<GoalDto> {
         const headers = await this.getAuthHeader();
         const url = `${GOALS_API_BASE_URL}/goals`;
+        console.log('🎯 GoalService - URL:', url);
+        console.log('🎯 GoalService - Headers:', headers);
+        console.log('🎯 GoalService - Data:', data);
         const response = await axios.post(url, data, { headers });
         return response.data;
     }

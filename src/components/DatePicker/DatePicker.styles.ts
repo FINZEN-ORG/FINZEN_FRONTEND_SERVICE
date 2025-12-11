@@ -158,6 +158,17 @@ export const datePickerStyles = StyleSheet.create({
     fontWeight: typography.fontWeight.bold,
   },
 
+  // Estilos para fechas deshabilitadas (pasadas)
+  dayDisabled: {
+    opacity: 0.3,
+    backgroundColor: '#F5F5F5',
+  },
+
+  dayTextDisabled: {
+    color: '#CCCCCC',
+    textDecorationLine: 'line-through',
+  },
+
   // Botones de acción
   actionButtons: {
     flexDirection: 'row',

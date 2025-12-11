@@ -131,8 +131,16 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
   };
 
-  // Seleccionar fecha
+  // Seleccionar fecha (solo fechas futuras permitidas)
   const selectDate = (date: Date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Prevenir selección de fechas pasadas
+    if (date < today) {
+      return;
+    }
+    
     setSelectedDate(date);
     const formattedDate = formatDate(date, format);
     onDateChange(formattedDate);
@@ -140,29 +148,39 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   };
 
   // Renderizar día del calendario
-  const renderCalendarDay = ({ item }: { item: CalendarDay }) => (
-    <TouchableOpacity
-      style={[
-        datePickerStyles.dayContainer,
-        !item.isCurrentMonth && datePickerStyles.dayInactive,
-        item.isToday && datePickerStyles.dayToday,
-        item.isSelected && datePickerStyles.daySelected,
-      ]}
-      onPress={() => selectDate(item.date)}
-      disabled={!item.isCurrentMonth}
-    >
-      <Text
+  const renderCalendarDay = ({ item }: { item: CalendarDay }) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const itemDate = new Date(item.date);
+    itemDate.setHours(0, 0, 0, 0);
+    const isPastDate = itemDate < today;
+    
+    return (
+      <TouchableOpacity
         style={[
-          datePickerStyles.dayText,
-          !item.isCurrentMonth && datePickerStyles.dayTextInactive,
-          item.isToday && datePickerStyles.dayTextToday,
-          item.isSelected && datePickerStyles.dayTextSelected,
+          datePickerStyles.dayContainer,
+          !item.isCurrentMonth && datePickerStyles.dayInactive,
+          item.isToday && datePickerStyles.dayToday,
+          item.isSelected && datePickerStyles.daySelected,
+          isPastDate && datePickerStyles.dayDisabled,
         ]}
+        onPress={() => selectDate(item.date)}
+        disabled={!item.isCurrentMonth || isPastDate}
       >
-        {item.day}
-      </Text>
-    </TouchableOpacity>
-  );
+        <Text
+          style={[
+            datePickerStyles.dayText,
+            !item.isCurrentMonth && datePickerStyles.dayTextInactive,
+            item.isToday && datePickerStyles.dayTextToday,
+            item.isSelected && datePickerStyles.dayTextSelected,
+            isPastDate && datePickerStyles.dayTextDisabled,
+          ]}
+        >
+          {item.day}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
 
   const monthNames = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',

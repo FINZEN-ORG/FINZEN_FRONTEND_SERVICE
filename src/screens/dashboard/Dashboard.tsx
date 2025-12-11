@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
 import { dashboardStyles } from './Dashboard.Style';
 import useDashboard from './useDashboard';
-import { FloatingActionButton } from '../../components';
+import { FloatingActionButton, MotivationalMessage } from '../../components';
 import { useNavigation } from '@react-navigation/native';
+import IoniconsIcon from '@react-native-vector-icons/ionicons';
 
 const Dashboard: React.FC = () => {
     const navigation = useNavigation<any>();
@@ -12,7 +13,7 @@ const Dashboard: React.FC = () => {
 
     if (loading && !refreshing) {
         return (
-            <View style={[dashboardStyles.container, { justifyContent: 'center' }]}>
+            <View style={[dashboardStyles.container, { justifyContent: 'center', backgroundColor: '#EAFFF2' }]}>
                 <ActivityIndicator size="large" color="#6C5CE7" />
             </View>
         );
@@ -21,41 +22,58 @@ const Dashboard: React.FC = () => {
     const balance = totalIncome - totalExpense;
 
     return (
-        <View style={{ flex: 1, backgroundColor: '#e9efe9ff' }}>
-            <ScrollView
-                contentContainerStyle={{ padding: 20, paddingBottom: 100 }} // Espacio para el FAB
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-            >
-                <View style={dashboardStyles.header}>
-                    <Text style={dashboardStyles.welcomeText}>¡Bienvenido! 🎉</Text>
-                    <Text style={dashboardStyles.userName}>{user?.name}</Text>
+        <View style={{ flex: 1, backgroundColor: '#EAFFF2' }}>
+            <View style={{ padding: 16, paddingTop: 10, paddingBottom: 0 }}>
+                {/* Botón de usuario arriba a la derecha */}
+                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 12 }}>
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate('Settings')}
+                        style={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: 20,
+                            backgroundColor: 'white',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            elevation: 2,
+                            shadowColor: '#000',
+                            shadowOffset: { width: 0, height: 2 },
+                            shadowOpacity: 0.1,
+                            shadowRadius: 3,
+                        }}
+                    >
+                        <IoniconsIcon name="person" size={22} color="#00c66d" />
+                    </TouchableOpacity>
                 </View>
+
+                {/* Mensaje Alentador */}
+                <MotivationalMessage />
 
                 {/* Balance Card */}
                 <View style={{
-                    padding: 20,
-                    backgroundColor: balance >= 0 ? '#6C5CE7' : '#FF6B6B',
+                    padding: 16,
+                    backgroundColor: balance >= 0 ? '#00A654' : '#FF6B6B',
                     borderRadius: 12,
                     elevation: 4,
-                    marginBottom: 20
+                    marginBottom: 16
                 }}>
-                    <Text style={{ color: '#fff', fontSize: 16 }}>Balance Total</Text>
-                    <Text style={{ color: '#fff', fontSize: 36, fontWeight: 'bold', marginVertical: 8 }}>
+                    <Text style={{ color: '#fff', fontSize: 14 }}>Balance Total</Text>
+                    <Text style={{ color: '#fff', fontSize: 32, fontWeight: 'bold', marginVertical: 6 }}>
                         ${balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                     </Text>
                 </View>
 
                 {/* Resumen Ingresos/Gastos */}
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 }}>
-                    <View style={{ flex: 0.48, backgroundColor: '#00D084', padding: 15, borderRadius: 12 }}>
-                        <Text style={{ color: 'white', fontSize: 12 }}>Ingresos</Text>
-                        <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold' }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 }}>
+                    <View style={{ flex: 0.48, backgroundColor: '#00D084', padding: 12, borderRadius: 12 }}>
+                        <Text style={{ color: 'white', fontSize: 11 }}>Ingresos</Text>
+                        <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold' }}>
                             ${totalIncome.toLocaleString()}
                         </Text>
                     </View>
-                    <View style={{ flex: 0.48, backgroundColor: '#FF6B6B', padding: 15, borderRadius: 12 }}>
-                        <Text style={{ color: 'white', fontSize: 12 }}>Gastos</Text>
-                        <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold' }}>
+                    <View style={{ flex: 0.48, backgroundColor: '#FF6B6B', padding: 12, borderRadius: 12 }}>
+                        <Text style={{ color: 'white', fontSize: 11 }}>Gastos</Text>
+                        <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold' }}>
                             ${totalExpense.toLocaleString()}
                         </Text>
                     </View>
@@ -63,6 +81,13 @@ const Dashboard: React.FC = () => {
 
                 {/* Transacciones Recientes */}
                 <Text style={dashboardStyles.sectionTitle}>Transacciones Recientes</Text>
+            </View>
+
+            <ScrollView
+                style={{ flex: 1, paddingHorizontal: 16 }}
+                contentContainerStyle={{ paddingBottom: 100 }}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+            >
                 {transactions.slice(0, 5).map((t) => (
                     <View key={t.id} style={{
                         flexDirection: 'row', justifyContent: 'space-between',
@@ -80,10 +105,6 @@ const Dashboard: React.FC = () => {
                         </Text>
                     </View>
                 ))}
-
-                <TouchableOpacity style={dashboardStyles.logoutButton} onPress={onLogoutPress}>
-                    <Text style={dashboardStyles.logoutButtonText}>Cerrar Sesión</Text>
-                </TouchableOpacity>
             </ScrollView>
 
             {/* Menú Flotante solo en Dashboard */}

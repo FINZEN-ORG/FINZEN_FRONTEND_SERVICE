@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import AuthService, { User } from '../services/AuthService';
 
 // Types for the context
@@ -83,11 +84,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   // Login function
-  const login = useCallback((userData: User, newToken?: string | null) => {
+  const login = useCallback(async (userData: User, newToken?: string | null) => {
     setUser(userData);
     setIsAuthenticated(true);
     if (newToken !== undefined) {
       setToken(newToken);
+    }
+    // Guardar sessionId único cuando el usuario inicia sesión
+    try {
+      const sessionId = userData.id || userData.email || Date.now().toString();
+      await AsyncStorage.setItem('@finzen_user_session_id', sessionId);
+    } catch (error) {
+      console.error('Error saving session ID:', error);
     }
   }, []);
 
@@ -99,6 +107,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(null);
       setIsAuthenticated(false);
       setToken(null);
+      // SOLO limpiar cache del mensaje motivacional y sessionId
+      // NO borrar onboarding ni otros datos del usuario
+      await AsyncStorage.removeItem('@finzen_motivational_message');
+      await AsyncStorage.removeItem('@finzen_user_session_id');
     } catch (error) {
       console.error('Error during logout:', error);
       // Even if logout fails, clear local state

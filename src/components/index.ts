@@ -28,6 +28,9 @@ export { default as FloatingMenu } from './FloatingMenu';
 // DatePicker
 export { DatePicker, type DatePickerProps } from './DatePicker';
 
+// AISuggestionCard
+export { default as AISuggestionCard } from './AISuggestionCard/AISuggestionCard';
+
 // FormField (generic form input renderer)
 export { default as FormField } from './FormField/FormField';
 export { default as FormRenderer } from './FormRenderer/FormRenderer';
@@ -39,3 +42,6 @@ export { HeaderWithBack, type HeaderWithBackProps } from './HeaderWithBack';
 
 // OptionCard (Onboarding)
 export { default as OptionCard } from './OptionCard/OptionCard';
+
+// MotivationalMessage
+export { default as MotivationalMessage } from './MotivationalMessage/MotivationalMessage';
