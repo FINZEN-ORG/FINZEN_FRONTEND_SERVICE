@@ -1,6 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Text } from 'react-native';
+import { View } from 'react-native';
+import IoniconsIcon from '@react-native-vector-icons/ionicons';
 import { tabStyles } from './TabNavigator.Style';
 
 import Dashboard from '../../screens/dashboard/Dashboard';
@@ -20,34 +21,24 @@ export type TabNavigatorParamList = {
 const Tab = createBottomTabNavigator<TabNavigatorParamList>();
 
 // Icon components defined outside render
-const DashboardIcon = ({ focused }: { focused: boolean }) => (
-  <Text style={focused ? tabStyles.iconFocused : tabStyles.iconUnfocused}>
-    🏠
-  </Text>
+const DashboardIcon = ({ focused, color }: { focused: boolean; color: string }) => (
+  <IoniconsIcon name={focused ? 'home' : 'home-outline'} size={24} color={color} />
 );
 
-const GoalsIcon = ({ focused }: { focused: boolean }) => (
-  <Text style={focused ? tabStyles.iconFocused : tabStyles.iconUnfocused}>
-    🎯
-  </Text>
+const GoalsIcon = ({ focused, color }: { focused: boolean; color: string }) => (
+  <IoniconsIcon name={focused ? 'flag' : 'flag-outline'} size={24} color={color} />
 );
 
-const CoachIcon = ({ focused }: { focused: boolean }) => (
-  <Text style={focused ? tabStyles.iconFocused : tabStyles.iconUnfocused}>
-    🤖
-  </Text>
+const CoachIcon = ({ focused, color }: { focused: boolean; color: string }) => (
+  <IoniconsIcon name={focused ? 'chatbubbles' : 'chatbubbles-outline'} size={24} color={color} />
 );
 
-const BudgetIcon = ({ focused }: { focused: boolean }) => (
-  <Text style={focused ? tabStyles.iconFocused : tabStyles.iconUnfocused}>
-    📊
-  </Text>
+const BudgetIcon = ({ focused, color }: { focused: boolean; color: string }) => (
+  <IoniconsIcon name={focused ? 'wallet' : 'wallet-outline'} size={24} color={color} />
 );
 
-const ReportsIcon = ({ focused }: { focused: boolean }) => (
-  <Text style={focused ? tabStyles.iconFocused : tabStyles.iconUnfocused}>
-    📈
-  </Text>
+const ReportsIcon = ({ focused, color }: { focused: boolean; color: string }) => (
+  <IoniconsIcon name={focused ? 'bar-chart' : 'bar-chart-outline'} size={24} color={color} />
 );
 
 export default function TabNavigator() {
@@ -63,7 +54,7 @@ export default function TabNavigator() {
           paddingBottom: 8,
           paddingTop: 8,
         },
-        tabBarActiveTintColor: '#007AFF',
+        tabBarActiveTintColor: '#00c66d',
         tabBarInactiveTintColor: '#8E8E93',
         tabBarLabelStyle: {
           fontSize: 11,

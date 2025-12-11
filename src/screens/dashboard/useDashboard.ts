@@ -18,6 +18,11 @@ export default function useDashboard() {
         try {
             setLoading(true);
 
+            // Imprimir token en consola
+            const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+            const token = await AsyncStorage.getItem('jwt');
+            console.log('🔑 JWT TOKEN:', token);
+
             const transactionsData = await TransactionService.getAllTransactions();
             setTransactions(transactionsData);
 

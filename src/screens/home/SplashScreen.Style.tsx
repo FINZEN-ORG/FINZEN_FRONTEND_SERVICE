@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 export const splashStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#e9efe9ff', 
+    backgroundColor: '#EAFFF2', 
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,

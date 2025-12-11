@@ -4,9 +4,9 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  ScrollView,
 } from 'react-native';
 import { styles } from './NewCategoryScreen.Style';
+import { colors } from '../../styles/colors';
 import useNewCategory from './useNewCategory';
 
 const NewCategoryScreen: React.FC = () => {
@@ -24,25 +24,26 @@ const NewCategoryScreen: React.FC = () => {
   } = useNewCategory();
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Nueva Categoría</Text>
+    <View style={{ flex: 1, backgroundColor: '#EAFFF2' }}>
+      <View style={[styles.container, { paddingBottom: 120 }]}>
+        <Text style={styles.title}>Nueva Categoría</Text>
       {/* Selector de Tipo (Gasto vs Ingreso) */}
       <View
         style={{
           flexDirection: 'row',
-          marginBottom: 20,
-          backgroundColor: '#EEE',
-          borderRadius: 10,
+          marginBottom: 24,
+          backgroundColor: colors.backgroundLight,
+          borderRadius: 12,
           padding: 4,
         }}
       >
         <TouchableOpacity
           style={{
             flex: 1,
-            padding: 10,
+            padding: 14,
             backgroundColor:
               selectedType === 'EXPENSE' ? 'white' : 'transparent',
-            borderRadius: 8,
+            borderRadius: 10,
             alignItems: 'center',
           }}
           onPress={() => setSelectedType('EXPENSE')}
@@ -50,7 +51,8 @@ const NewCategoryScreen: React.FC = () => {
           <Text
             style={{
               fontWeight: 'bold',
-              color: selectedType === 'EXPENSE' ? 'black' : '#666',
+              fontSize: 16,
+              color: selectedType === 'EXPENSE' ? colors.textPrimary : colors.textSecondary,
             }}
           >
             Gasto 💸
@@ -59,10 +61,10 @@ const NewCategoryScreen: React.FC = () => {
         <TouchableOpacity
           style={{
             flex: 1,
-            padding: 10,
+            padding: 14,
             backgroundColor:
               selectedType === 'INCOME' ? 'white' : 'transparent',
-            borderRadius: 8,
+            borderRadius: 10,
             alignItems: 'center',
           }}
           onPress={() => setSelectedType('INCOME')}
@@ -70,7 +72,8 @@ const NewCategoryScreen: React.FC = () => {
           <Text
             style={{
               fontWeight: 'bold',
-              color: selectedType === 'INCOME' ? 'black' : '#666',
+              fontSize: 16,
+              color: selectedType === 'INCOME' ? colors.textPrimary : colors.textSecondary,
             }}
           >
             Ingreso 💰
@@ -80,17 +83,22 @@ const NewCategoryScreen: React.FC = () => {
 
       {/* INPUT DE EMOJI NATIVO */}
       <Text style={styles.label}>Icono (Toca para cambiar)</Text>
-      <View style={{ alignItems: 'center', marginBottom: 20 }}>
+      <View style={{ alignItems: 'center', marginBottom: 24 }}>
         <View
           style={{
-            width: 80,
-            height: 80,
-            borderRadius: 40,
-            backgroundColor: '#F0F0F0',
+            width: 90,
+            height: 90,
+            borderRadius: 45,
+            backgroundColor: 'white',
             justifyContent: 'center',
             alignItems: 'center',
-            borderWidth: 1,
-            borderColor: '#DDD',
+            borderWidth: 2,
+            borderColor: colors.border,
+            elevation: 2,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 3,
           }}
         >
           <TextInput
@@ -119,7 +127,7 @@ const NewCategoryScreen: React.FC = () => {
             placeholder="😀"
           />
         </View>
-        <Text style={{ fontSize: 12, color: '#888', marginTop: 5 }}>
+        <Text style={{ fontSize: 12, color: colors.textSecondary, marginTop: 8 }}>
           Usa tu teclado de emojis
         </Text>
       </View>
@@ -141,18 +149,30 @@ const NewCategoryScreen: React.FC = () => {
         value={description}
         onChangeText={setDescription}
       />
+      </View>
 
-      <TouchableOpacity style={styles.primaryBtn} onPress={handleCreate}>
-        <Text style={styles.primaryBtnText}>Crear Categoría</Text>
-      </TouchableOpacity>
+      {/* Botones fijos en la parte inferior */}
+      <View style={{
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        padding: 20,
+        paddingBottom: 30,
+        backgroundColor: '#EAFFF2',
+      }}>
+        <TouchableOpacity style={styles.primaryBtn} onPress={handleCreate}>
+          <Text style={styles.primaryBtnText}>Crear Categoría</Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.secondaryBtn}
-        onPress={() => handleCancel()}
-      >
-        <Text style={styles.secondaryBtnText}>Cancelar</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        <TouchableOpacity
+          style={styles.secondaryBtn}
+          onPress={() => handleCancel()}
+        >
+          <Text style={styles.secondaryBtnText}>Cancelar</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 };
 

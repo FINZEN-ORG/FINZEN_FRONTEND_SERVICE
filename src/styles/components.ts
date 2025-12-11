@@ -7,7 +7,7 @@ export const globalStyles = StyleSheet.create({
   // Contenedores
   screenContainer: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: '#EAFFF2',
     padding: spacing.md,
   },
 

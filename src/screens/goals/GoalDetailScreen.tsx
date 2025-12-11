@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ActivityIndicator, TouchableOpacity, Alert, ScrollView, Modal, TextInput } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
-import { HeaderWithBack, DatePicker } from '../../components';
+import { HeaderWithBack, DatePicker, AISuggestionCard } from '../../components';
 import { globalStyles, colors } from '../../styles';
 import GoalService, { GoalDto, GoalTransactionDto } from '../../services/GoalService';
+import AIService, { AIRecommendation } from '../../services/AIService';
 
 const GOAL_CATEGORIES = [
     { label: 'Viaje ✈️', value: 'TRAVEL' },
@@ -37,6 +38,10 @@ const GoalDetailScreen: React.FC = () => {
     const [editDate, setEditDate] = useState('');
     const [editCategory, setEditCategory] = useState<string>('OTHER');
 
+    // Estado para sugerencias de IA
+    const [aiRecommendation, setAiRecommendation] = useState<AIRecommendation | null>(null);
+    const [aiLoading, setAiLoading] = useState(false);
+
     const loadGoalDetail = async () => {
         try {
             setLoading(true);
@@ -67,6 +72,33 @@ const GoalDetailScreen: React.FC = () => {
     useEffect(() => {
         loadGoalDetail();
     }, [goalId]);
+
+    // Cargar sugerencias de IA cuando se carga la meta
+    useEffect(() => {
+        const loadAISuggestions = async () => {
+            if (!goal) return;
+            
+            setAiLoading(true);
+            try {
+                const recommendation = await AIService.analyzeGoalViability({
+                    name: goal.name,
+                    targetAmount: goal.targetAmount,
+                    category: goal.category.toString(),
+                    dueDate: goal.dueDate,
+                    description: goal.description
+                });
+                setAiRecommendation(recommendation);
+            } catch (error) {
+                console.error('Error loading AI suggestions:', error);
+                // En caso de error, ocultar la tarjeta de IA
+                setAiRecommendation(null);
+            } finally {
+                setAiLoading(false);
+            }
+        };
+
+        loadAISuggestions();
+    }, [goal?.id]);
 
     const handleUpdate = async () => {
         if (!editName || !editTarget) {
@@ -164,6 +196,16 @@ const GoalDetailScreen: React.FC = () => {
                         </TouchableOpacity>
                     </View>
                 </View>
+
+                {/* SUGERENCIAS DE IA */}
+                <AISuggestionCard 
+                    recommendation={aiRecommendation?.message || null}
+                    loading={aiLoading}
+                    isViable={aiRecommendation?.isViable}
+                    suggestedMonthlyAmount={aiRecommendation?.suggestedMonthlyAmount}
+                    tips={aiRecommendation?.tips}
+                    style={{ marginBottom: 20 }}
+                />
 
                 {/* BOTONES DE EDICIÓN */}
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 25 }}>
