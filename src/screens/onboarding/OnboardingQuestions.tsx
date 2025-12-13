@@ -9,10 +9,8 @@ import OnboardingStyles from './OnboardingStyles';
 import Header from '../../components/Onboarding/Header';
 import { getOnboardingForTone } from '../../data/onboardingQuestions';
 
-
 const OnboardingQuestions: React.FC = () => {
   const navigation = useNavigation();
-
   const {
     state,
     setStep,
@@ -35,8 +33,8 @@ const OnboardingQuestions: React.FC = () => {
 
   const onContinue = () => {
     if (canContinue) {
-      setStep(3); // move to step 3 for the next screen
-      (navigation as any).navigate('Processing'); // Navigate directly to Processing
+      setStep(3);
+      (navigation as any).navigate('FinancialSituation');
     }
   };
 

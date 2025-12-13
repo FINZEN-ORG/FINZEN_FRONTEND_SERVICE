@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import TransactionService from '../../services/TransactionService';
+import CategoryService from '../../services/CategoryService';
 
 interface CategoryExpense {
   category: string;
@@ -16,56 +17,76 @@ export default function useReports() {
   const [totalExpense, setTotalExpense] = useState(0);
   const [categoryExpenses, setCategoryExpenses] = useState<CategoryExpense[]>([]);
 
-  // Colores variados para categorías (no solo verdes)
-  const categoryColors: { [key: string]: string } = {
-    'Comida': '#FF6B6B',
-    'Comida y Restaurantes': '#FF6B6B',
-    'Transporte': '#4ECDC4',
-    'Entretenimiento': '#FFD93D',
-    'Compras': '#A8E6CF',
-    'Salud': '#95E1D3',
-    'Salud y Medicina': '#95E1D3',
-    'Educación': '#6C5CE7',
-    'Vivienda': '#FFA07A',
-    'Servicios': '#00c66d',
-    'Servicios y Facturas': '#00c66d',
-    'Ropa y Accesorios': '#F38181',
-    'payaso': '#FF69B4',
-    'Otros': '#95A4AB'
-  };
+  const GRAPH_PALETTE = [
+    '#FF6B6B', // Rojo suave
+    '#4ECDC4', // Turquesa
+    '#FFD93D', // Amarillo
+    '#6C5CE7', // Morado
+    '#A8E6CF', // Verde menta
+    '#FF8A65', // Naranja
+    '#A29BFE', // Lavanda
+    '#FD79A8', // Rosa
+    '#00CEC9', // Azul verdoso
+    '#FAB1A0', // Durazno
+    '#74B9FF', // Azul cielo
+    '#DFE6E9'  // Gris claro
+  ];
 
   const loadReports = async () => {
     try {
       setLoading(true);
-      const reports = await TransactionService.getReports();
-      const transactions = await TransactionService.getAllTransactions();
-      
-      setTotalIncome(reports.totalIncome);
-      setTotalExpense(reports.totalExpense);
 
-      // Agrupar gastos por categoría
+      // 1. Cargar datos en paralelo
+      const [reportsData, transactionsData, categoriesData] = await Promise.all([
+        TransactionService.getReports(),
+        TransactionService.getAllTransactions(),
+        CategoryService.getAllCategories()
+      ]);
+
+      setTotalIncome(reportsData.totalIncome);
+      setTotalExpense(reportsData.totalExpense);
+
+      // 2. Mapa de Categorías (ID -> Nombre)
+      const categoryMap = new Map<number, string>();
+      categoriesData.forEach(cat => {
+        categoryMap.set(cat.id, cat.name);
+      });
+
+      // 3. Agrupar gastos
       const expensesByCategory: { [key: string]: number } = {};
-      transactions
-        .filter(t => t.type === 'EXPENSE')
-        .forEach(t => {
-          // Usar el nombre de la categoría del backend, sin modificarlo
-          const categoryName = t.category?.name || 'Sin categoría';
-          expensesByCategory[categoryName] = (expensesByCategory[categoryName] || 0) + t.amount;
-        });
 
-      console.log('📊 Categorías detectadas:', Object.keys(expensesByCategory));
+      transactionsData
+          .filter(t => t.type === 'EXPENSE')
+          .forEach(t => {
+            // Si no encuentra el nombre, usa 'Otros'
+            const catName = categoryMap.get(t.categoryId) || 'Otros';
+            expensesByCategory[catName] = (expensesByCategory[catName] || 0) + t.amount;
+          });
 
-      // Convertir a array y calcular porcentajes
-      const categories: CategoryExpense[] = Object.entries(expensesByCategory)
-        .map(([category, amount]) => ({
-          category,
-          amount,
-          percentage: totalExpense > 0 ? (amount / reports.totalExpense) * 100 : 0,
-          color: categoryColors[category] || '#95A4AB' // Color gris por defecto
-        }))
-        .sort((a, b) => b.amount - a.amount); // Mostrar todas las categorías ordenadas
+      // 4. Convertir a lista y asignar colores dinámicamente
+      const categoriesList: CategoryExpense[] = Object.entries(expensesByCategory)
+          .map(([category, amount]) => ({
+            category,
+            amount,
+            percentage: 0, // Lo calculamos abajo después de ordenar o sumar
+            color: ''      // Lo asignamos abajo
+          }))
+          .sort((a, b) => b.amount - a.amount); // Ordenar: Mayor gasto primero
 
-      setCategoryExpenses(categories);
+      // Recalcular porcentajes reales y ASIGNAR COLOR POR ÍNDICE
+      const finalCategories = categoriesList.map((item, index) => ({
+        ...item,
+        // Si totalExpense es 0, evita división por cero
+        percentage: reportsData.totalExpense > 0
+            ? (item.amount / reportsData.totalExpense) * 100
+            : 0,
+        // Aquí está la magia: Usa el operador módulo (%) para rotar los colores
+        // Si hay 15 categorías y 12 colores, la categoría 13 usa el color 1 de nuevo.
+        color: GRAPH_PALETTE[index % GRAPH_PALETTE.length]
+      }));
+
+      setCategoryExpenses(finalCategories);
+
     } catch (error) {
       console.error('Error loading reports:', error);
     } finally {
@@ -75,9 +96,9 @@ export default function useReports() {
   };
 
   useFocusEffect(
-    useCallback(() => {
-      loadReports();
-    }, [])
+      useCallback(() => {
+        loadReports();
+      }, [])
   );
 
   const onRefresh = () => {
@@ -86,7 +107,10 @@ export default function useReports() {
   };
 
   const balance = totalIncome - totalExpense;
-  const savingsRate = totalIncome > 0 ? ((balance / totalIncome) * 100).toFixed(1) : 0;
+  // Manejo seguro de string para savingsRate
+  const savingsRate = totalIncome > 0
+      ? ((balance / totalIncome) * 100).toFixed(1)
+      : '0.0';
 
   return {
     loading,

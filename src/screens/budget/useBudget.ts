@@ -21,6 +21,12 @@ export default function useBudget() {
                 TransactionService.getAllTransactions()
             ]);
 
+            console.log('📊 Datos cargados:', {
+                categories: catsData.length,
+                budgets: budgetsData.length,
+                transactions: transactionsData.length
+            });
+
             setCategories(catsData);
             setBudgets(budgetsData);
 
@@ -28,8 +34,8 @@ export default function useBudget() {
             const expenses = transactionsData
                 .filter(t => t.type === 'EXPENSE')
                 .slice(0, 5); // Solo los últimos 5
-            setRecentExpenses(expenses);
 
+            setRecentExpenses(expenses);
         } catch (error) {
             console.error("Error loading budget screen:", error);
         } finally {
@@ -80,6 +86,7 @@ export default function useBudget() {
     return {
         loading,
         budgets: mapBudgetsToDisplay(),
+        categories, // Exportamos categorías para usar en BudgetScreen
         expenses: mapExpensesToDisplay(),
         reload: loadData,
     };

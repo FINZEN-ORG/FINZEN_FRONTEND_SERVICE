@@ -38,13 +38,23 @@ local.properties
 *.keystore
 !debug.keystore
 .kotlin/
-
 # node.js
 #
 node_modules/
 npm-debug.log
 yarn-error.log
+# Keystores
+*.keystore
+*.jks
 
+# Gradle Properties
+android/gradle.properties
+android/local.properties
+
+# Environment
+.env
+.env.local
+.env.production
 # fastlane
 #
 # It is recommended to not store the screenshots in the git repo. Instead, use fastlane to re-generate the

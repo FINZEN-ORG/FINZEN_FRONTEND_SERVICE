@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
 import { globalStyles } from '../../styles';
 import { colors } from '../../styles/colors';
-import { HeaderWithBack } from '../../components';
 import useReports from './useReports';
-import Svg, { Circle, Text as SvgText } from 'react-native-svg';
-import { formatCOP, formatCOPCompact } from '../../utils/formatCurrency';
+import Svg, { Circle, G, Text as SvgText } from 'react-native-svg';
+import { formatCOPCompact } from '../../utils/formatCurrency';
 
 const ReportsScreen: React.FC = () => {
-  const { loading, totalIncome, totalExpense, categoryExpenses } = useReports();
-  const [selectedPeriod, setSelectedPeriod] = useState('Este mes');
+  const { loading, refreshing, onRefresh, totalIncome, totalExpense, categoryExpenses, balance } = useReports();
+  const [selectedPeriod] = useState('Histórico'); // Por ahora es histórico global
 
-  if (loading) {
+  if (loading && !refreshing) {
     return (
         <View style={[globalStyles.screenContainer, { justifyContent: 'center', alignItems: 'center' }]}>
           <ActivityIndicator size="large" color={colors.primary} />
@@ -20,208 +19,138 @@ const ReportsScreen: React.FC = () => {
   }
 
   const hasData = totalIncome > 0 || totalExpense > 0;
+  const totalFlow = totalIncome + totalExpense;
 
-  const total = totalIncome + totalExpense;
-  const incomePercentage = total > 0 ? (totalIncome / total) * 100 : 50;
-  const expensePercentage = total > 0 ? (totalExpense / total) * 100 : 50;
+  // Evitar división por cero
+  const incomePct = totalFlow > 0 ? (totalIncome / totalFlow) * 100 : 0;
+  const expensePct = totalFlow > 0 ? (totalExpense / totalFlow) * 100 : 0;
 
-  // Cálculos para el gráfico de dona
-  const radius = 80;
+  // Configuración Dona SVG
+  const size = 200;
+  const strokeWidth = 20;
+  const center = size / 2;
+  const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  const incomeStroke = (incomePercentage / 100) * circumference;
-  const expenseStroke = (expensePercentage / 100) * circumference;
+
+  // Cálculos de arcos
+  const incomeStrokeDash = (incomePct / 100) * circumference;
+  const expenseStrokeDash = (expensePct / 100) * circumference;
+
+  // Rotación para que empiece arriba
+  const rotation = -90;
 
   return (
-    <ScrollView style={globalStyles.screenContainer}>
-      <View style={{ padding: 20, paddingBottom: 10, alignItems: 'center' }}>
-        <Text style={{ fontSize: 28, fontWeight: 'bold', color: colors.textPrimary, marginTop: 8 }}>Reportes</Text>
-      </View>
-
-      {!hasData ? (
-        <View style={{
-          backgroundColor: 'white',
-          borderRadius: 16,
-          padding: 40,
-          margin: 16,
-          elevation: 2,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 4,
-          alignItems: 'center',
-        }}>
-          <Text style={{ fontSize: 48, marginBottom: 16 }}>📊</Text>
-          <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.textPrimary, marginBottom: 8, textAlign: 'center' }}>
-            No hay datos aún
-          </Text>
-          <Text style={{ fontSize: 14, color: colors.textSecondary, textAlign: 'center', lineHeight: 20 }}>
-            Comienza a registrar tus ingresos y gastos para ver tus reportes financieros
-          </Text>
-        </View>
-      ) : (
-        <>
-      {/* Ingresos vs Gastos Card */}
-      <View style={{
-        backgroundColor: 'white',
-        borderRadius: 16,
-        padding: 20,
-        margin: 16,
-        elevation: 2,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      }}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-          <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.textPrimary }}>Ingresos vs Gastos</Text>
-          <TouchableOpacity style={{
-            paddingVertical: 6,
-            paddingHorizontal: 12,
-            borderRadius: 8,
-            borderWidth: 1,
-            borderColor: colors.border,
-          }}>
-            <Text style={{ fontSize: 12, color: colors.textSecondary }}>{selectedPeriod} ▼</Text>
-          </TouchableOpacity>
+      <ScrollView
+          style={globalStyles.screenContainer}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
+        <View style={{ padding: 20, paddingBottom: 10 }}>
+          <Text style={{ fontSize: 28, fontWeight: 'bold', color: colors.textPrimary }}>Reportes</Text>
+          <Text style={{ color: colors.textSecondary }}>Resumen financiero</Text>
         </View>
 
-        {/* Gráfico de Dona */}
-        <View style={{ alignItems: 'center', marginVertical: 20 }}>
-          <Svg width="200" height="200">
-            {/* Círculo de fondo */}
-            <Circle
-              cx="100"
-              cy="100"
-              r={radius}
-              stroke="#E0E0E0"
-              strokeWidth="20"
-              fill="none"
-            />
-            {/* Segmento de Ingresos */}
-            <Circle
-              cx="100"
-              cy="100"
-              r={radius}
-              stroke={colors.primary}
-              strokeWidth="20"
-              fill="none"
-              strokeDasharray={`${incomeStroke} ${circumference}`}
-              strokeDashoffset="0"
-              rotation="-90"
-              origin="100, 100"
-            />
-            {/* Segmento de Gastos */}
-            <Circle
-              cx="100"
-              cy="100"
-              r={radius}
-              stroke="#FF6B6B"
-              strokeWidth="20"
-              fill="none"
-              strokeDasharray={`${expenseStroke} ${circumference}`}
-              strokeDashoffset={-incomeStroke}
-              rotation="-90"
-              origin="100, 100"
-            />
-            {/* Texto central */}
-            <SvgText
-              x="100"
-              y="95"
-              textAnchor="middle"
-              fontSize="20"
-              fontWeight="bold"
-              fill={colors.textPrimary}
-            >
-              {formatCOPCompact(total)}
-            </SvgText>
-            <SvgText
-              x="100"
-              y="115"
-              textAnchor="middle"
-              fontSize="14"
-              fill="#999"
-            >
-              Total
-            </SvgText>
-          </Svg>
-        </View>
-
-        {/* Leyenda */}
-        <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginTop: 10 }}>
-          <View style={{ alignItems: 'center' }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-              <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: colors.primary, marginRight: 6 }} />
-              <Text style={{ fontSize: 12, color: '#666' }}>Ingresos</Text>
+        {!hasData ? (
+            <View style={{ alignItems: 'center', marginTop: 50, padding: 20 }}>
+              <Text style={{ fontSize: 40, marginBottom: 10 }}>📉</Text>
+              <Text style={{ color: '#666', textAlign: 'center' }}>
+                No hay transacciones registradas aún.
+              </Text>
             </View>
-            <Text style={{ fontSize: 16, fontWeight: 'bold', color: colors.textPrimary }}>{formatCOPCompact(totalIncome)}</Text>
-          </View>
-          <View style={{ alignItems: 'center' }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-              <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: '#FF6B6B', marginRight: 6 }} />
-              <Text style={{ fontSize: 12, color: '#666' }}>Gastos</Text>
-            </View>
-            <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#FF6B6B' }}>{formatCOPCompact(totalExpense)}</Text>
-          </View>
-        </View>
-      </View>
-
-      {/* Gastos por categoría */}
-      <View style={{
-        backgroundColor: 'white',
-        borderRadius: 16,
-        padding: 20,
-        margin: 16,
-        marginTop: 0,
-        elevation: 2,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      }}>
-        <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.textPrimary, marginBottom: 16 }}>Gastos por categoría</Text>
-        
-        {categoryExpenses.length > 0 ? (
-          categoryExpenses.map((cat, index) => (
-            <View key={index} style={{ marginBottom: 16 }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
-                <Text style={{ fontSize: 14, color: colors.textPrimary }}>{cat.category}</Text>
-                <Text style={{ fontSize: 14, fontWeight: '600', color: colors.textPrimary }}>{formatCOP(cat.amount)}</Text>
-              </View>
-              <View style={{ height: 8, backgroundColor: '#F0F0F0', borderRadius: 4, overflow: 'hidden' }}>
-                <View style={{
-                  width: `${cat.percentage}%`,
-                  height: '100%',
-                  backgroundColor: cat.color,
-                  borderRadius: 4,
-                }} />
-              </View>
-            </View>
-          ))
         ) : (
-          <Text style={{ textAlign: 'center', color: '#999', padding: 20 }}>No hay gastos registrados</Text>
-        )}
-      </View>
+            <>
+              {/* Tarjeta de Balance y Gráfico */}
+              <View style={{
+                backgroundColor: 'white', margin: 16, borderRadius: 16, padding: 20,
+                elevation: 4, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 5
+              }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 }}>
+                  <View>
+                    <Text style={{ color: '#666', fontSize: 12 }}>Balance Total</Text>
+                    <Text style={{ fontSize: 24, fontWeight: 'bold', color: balance >= 0 ? colors.success : colors.expense }}>
+                      {formatCOPCompact(balance)}
+                    </Text>
+                  </View>
+                  <View style={{ backgroundColor: '#F0F0F0', padding: 5, borderRadius: 8 }}>
+                    <Text style={{ fontSize: 12, color: '#666' }}>{selectedPeriod}</Text>
+                  </View>
+                </View>
 
-      {/* Tendencia de gastos */}
-      <View style={{
-        backgroundColor: 'white',
-        borderRadius: 16,
-        padding: 20,
-        margin: 16,
-        marginTop: 0,
-        marginBottom: 30,
-        elevation: 2,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      }}>
-        <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.textPrimary, marginBottom: 8 }}>Tendencia de gastos</Text>
-        <Text style={{ fontSize: 12, color: '#999' }}>Últimos 6 meses</Text>
-      </View>
-      </>
-      )}
-    </ScrollView>
+                <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+                  <Svg width={size} height={size}>
+                    <G rotation={rotation} origin={`${center}, ${center}`}>
+                      {/* Fondo gris completo */}
+                      <Circle cx={center} cy={center} r={radius} stroke="#F0F0F0" strokeWidth={strokeWidth} fill="none" />
+
+                      {/* Arco de Ingresos (Verde) */}
+                      {incomePct > 0 && (
+                          <Circle
+                              cx={center} cy={center} r={radius}
+                              stroke={colors.success} strokeWidth={strokeWidth} fill="none"
+                              strokeDasharray={`${incomeStrokeDash} ${circumference}`}
+                              strokeLinecap="round"
+                          />
+                      )}
+
+                      {/* Arco de Gastos (Rojo) - empieza donde termina el verde */}
+                      {expensePct > 0 && (
+                          <Circle
+                              cx={center} cy={center} r={radius}
+                              stroke={colors.expense} strokeWidth={strokeWidth} fill="none"
+                              strokeDasharray={`${expenseStrokeDash} ${circumference}`}
+                              strokeDashoffset={-incomeStrokeDash}
+                              strokeLinecap="round"
+                          />
+                      )}
+                    </G>
+                    {/* Texto Central */}
+                    <SvgText x={center} y={center - 10} textAnchor="middle" fontSize="12" fill="#999">Flujo Total</SvgText>
+                    <SvgText x={center} y={center + 15} textAnchor="middle" fontSize="18" fontWeight="bold" fill={colors.textPrimary}>
+                      {formatCOPCompact(totalFlow)}
+                    </SvgText>
+                  </Svg>
+                </View>
+
+                {/* Leyenda Simple */}
+                <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 20, gap: 20 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                    <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: colors.success }} />
+                    <Text style={{ color: '#666' }}>Ingresos ({incomePct.toFixed(0)}%)</Text>
+                  </View>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                    <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: colors.expense }} />
+                    <Text style={{ color: '#666' }}>Gastos ({expensePct.toFixed(0)}%)</Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* Lista de Gastos por Categoría */}
+              <Text style={{ fontSize: 18, fontWeight: 'bold', marginLeft: 20, marginBottom: 10, color: colors.textPrimary }}>
+                Gastos por Categoría
+              </Text>
+
+              <View style={{ paddingHorizontal: 16, paddingBottom: 30 }}>
+                {categoryExpenses.map((cat, index) => (
+                    <View key={index} style={{ marginBottom: 15 }}>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 5 }}>
+                        <Text style={{ fontWeight: '600', color: '#444' }}>{cat.category}</Text>
+                        <Text style={{ fontWeight: 'bold', color: '#444' }}>{formatCOPCompact(cat.amount)}</Text>
+                      </View>
+                      <View style={{ height: 8, backgroundColor: '#E0E0E0', borderRadius: 4, overflow: 'hidden' }}>
+                        <View style={{
+                          width: `${cat.percentage}%`,
+                          height: '100%',
+                          backgroundColor: cat.color
+                        }} />
+                      </View>
+                      <Text style={{ fontSize: 10, color: '#999', textAlign: 'right', marginTop: 2 }}>
+                        {cat.percentage.toFixed(1)}%
+                      </Text>
+                    </View>
+                ))}
+              </View>
+            </>
+        )}
+      </ScrollView>
   );
 };
 
