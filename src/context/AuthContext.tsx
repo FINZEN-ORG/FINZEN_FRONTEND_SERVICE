@@ -7,6 +7,8 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  onboardingCompleted: boolean;
+  setOnboardingCompleted: (completed: boolean) => Promise<void>;
   login: (userData: User, token?: string | null) => void;
   logout: () => Promise<void>;
   checkAuthStatus: () => Promise<void>;
@@ -26,6 +28,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [token, setToken] = useState<string | null>(null);
+  const [onboardingCompleted, setOnboardingCompletedState] = useState<boolean>(false);
+
+  // Clave para persistir la bandera
+  const ONBOARDING_KEY = '@finzen_onboarding_completed';
 
   // Initialize authentication status
   useEffect(() => {
@@ -35,13 +41,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const initializeAuth = async () => {
     try {
       setIsLoading(true);
-      // Configure Google Sign In
       AuthService.configureGoogleSignIn();
-
-      // Check if user is already authenticated
       const userData = await AuthService.checkAuthStatus();
       const storedToken = await AuthService.getToken();
-
+      const onboardingFlag = await AsyncStorage.getItem(ONBOARDING_KEY);
+      setOnboardingCompletedState(onboardingFlag === 'true');
       if (userData) {
         setUser(userData);
         setIsAuthenticated(true);
@@ -92,16 +96,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (newToken !== undefined) {
       setToken(newToken);
     }
-
     // Guardar sessionId y userId de forma segura (como Strings)
     try {
-      // FIX: Asegurar que convertimos a String para evitar error java.lang.Double
       const sessionId = String(userData.id || userData.email || Date.now());
       const userId = String(userData.id || '0');
-
       await AsyncStorage.setItem('@finzen_user_session_id', sessionId);
       await AsyncStorage.setItem('@finzen_user_id', userId);
-
+      // Si es la primera vez, inicializar la bandera de onboardingCompleted en false
+      const onboardingFlag = await AsyncStorage.getItem(ONBOARDING_KEY);
+      if (onboardingFlag === null) {
+        await AsyncStorage.setItem(ONBOARDING_KEY, 'false');
+        setOnboardingCompletedState(false);
+      } else {
+        setOnboardingCompletedState(onboardingFlag === 'true');
+      }
     } catch (error) {
       console.error('Error saving session details:', error);
     }
@@ -115,11 +123,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(null);
       setIsAuthenticated(false);
       setToken(null);
-
+      setOnboardingCompletedState(false);
       // Limpiar datos de sesión
       await AsyncStorage.removeItem('@finzen_motivational_message');
       await AsyncStorage.removeItem('@finzen_user_session_id');
       await AsyncStorage.removeItem('@finzen_user_id');
+      await AsyncStorage.removeItem(ONBOARDING_KEY);
     } catch (error) {
       console.error('Error during logout:', error);
       setUser(null);
@@ -130,18 +139,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, []);
 
+  // Función para actualizar la bandera y persistirla
+  const setOnboardingCompleted = useCallback(async (completed: boolean) => {
+    setOnboardingCompletedState(completed);
+    try {
+      await AsyncStorage.setItem(ONBOARDING_KEY, completed ? 'true' : 'false');
+    } catch (e) {
+      // ignore
+    }
+  }, []);
+
   const value = useMemo(() => {
     const v: any = {
       user,
       isLoading,
       isAuthenticated,
+      onboardingCompleted,
+      setOnboardingCompleted,
       login,
       logout,
       checkAuthStatus,
     };
     v.token = token;
     return v as AuthContextType;
-  }, [user, isLoading, isAuthenticated, login, logout, checkAuthStatus, token]);
+  }, [user, isLoading, isAuthenticated, onboardingCompleted, setOnboardingCompleted, login, logout, checkAuthStatus, token]);
 
   return (
       <AuthContext.Provider value={value}>

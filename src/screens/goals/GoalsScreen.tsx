@@ -385,72 +385,72 @@ const GoalsScreen: React.FC = () => {
             {/* MODAL DE CREACIÓN */}
             <Modal visible={createModalVisible} transparent animationType="slide">
                 <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', padding: 20 }}>
-                    <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
-                        <View style={{ backgroundColor: 'white', padding: 24, borderRadius: 16, maxHeight: '90%' }}>
+                    <View style={{ backgroundColor: 'white', padding: 24, borderRadius: 16, maxHeight: '90%', width: '100%' }}>
+                        <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
                             <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 20, color: colors.textPrimary }}>Nueva Meta</Text>
 
-                        <Text style={{ marginBottom: 5, fontWeight:'600', color: colors.textSecondary }}>Nombre</Text>
-                        <TextInput
-                            value={newGoalName} onChangeText={setNewGoalName} placeholder="Ej: Viaje a Europa"
-                            style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 8, padding: 12, marginBottom: 15, backgroundColor: colors.backgroundSecondary }}
-                        />
-
-                        <Text style={{ marginBottom: 5, fontWeight:'600', color: colors.textSecondary }}>Monto Objetivo ($)</Text>
-                        <TextInput
-                            value={newGoalTarget} onChangeText={setNewGoalTarget} placeholder="0.00" keyboardType="numeric"
-                            style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 8, padding: 12, marginBottom: 15, backgroundColor: colors.backgroundSecondary }}
-                        />
-
-                        <Text style={{ marginBottom: 5, fontWeight:'600', color: colors.textSecondary }}>Fecha Límite</Text>
-                        <View style={{ marginBottom: 15 }}>
-                            <DatePicker
-                                value={newGoalDate}
-                                onDateChange={setNewGoalDate}
-                                placeholder="Seleccionar fecha"
-                                format="YYYY-MM-DD"
+                            <Text style={{ marginBottom: 5, fontWeight:'600', color: colors.textSecondary }}>Nombre</Text>
+                            <TextInput
+                                value={newGoalName} onChangeText={setNewGoalName} placeholder="Ej: Viaje a Europa"
+                                style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 8, padding: 12, marginBottom: 15, backgroundColor: colors.backgroundSecondary }}
                             />
-                        </View>
 
-                        <Text style={{ marginBottom: 8, fontWeight:'600', color: colors.textSecondary }}>Categoría</Text>
-                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
-                            {GOAL_CATEGORIES.map((cat) => (
-                                <TouchableOpacity
-                                    key={cat.value}
-                                    onPress={() => setNewGoalCategory(cat.value)}
-                                    style={{
-                                        paddingVertical: 6, paddingHorizontal: 12, borderRadius: 20,
-                                        backgroundColor: newGoalCategory === cat.value ? colors.primary : '#F0F0F0',
-                                        borderWidth: 1, borderColor: newGoalCategory === cat.value ? colors.primary : '#E0E0E0'
-                                    }}
-                                >
-                                    <Text style={{ fontSize: 12, color: newGoalCategory === cat.value ? 'white' : '#666', fontWeight: newGoalCategory === cat.value ? 'bold' : 'normal' }}>
-                                        {cat.label}
-                                    </Text>
+                            <Text style={{ marginBottom: 5, fontWeight:'600', color: colors.textSecondary }}>Monto Objetivo ($)</Text>
+                            <TextInput
+                                value={newGoalTarget} onChangeText={setNewGoalTarget} placeholder="0.00" keyboardType="numeric"
+                                style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 8, padding: 12, marginBottom: 15, backgroundColor: colors.backgroundSecondary }}
+                            />
+
+                            <Text style={{ marginBottom: 5, fontWeight:'600', color: colors.textSecondary }}>Fecha Límite</Text>
+                            <View style={{ marginBottom: 15 }}>
+                                <DatePicker
+                                    value={newGoalDate}
+                                    onDateChange={setNewGoalDate}
+                                    placeholder="Seleccionar fecha"
+                                    format="YYYY-MM-DD"
+                                />
+                            </View>
+
+                            <Text style={{ marginBottom: 8, fontWeight:'600', color: colors.textSecondary }}>Categoría</Text>
+                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
+                                {GOAL_CATEGORIES.map((cat) => (
+                                    <TouchableOpacity
+                                        key={cat.value}
+                                        onPress={() => setNewGoalCategory(cat.value)}
+                                        style={{
+                                            paddingVertical: 6, paddingHorizontal: 12, borderRadius: 20,
+                                            backgroundColor: newGoalCategory === cat.value ? colors.primary : '#F0F0F0',
+                                            borderWidth: 1, borderColor: newGoalCategory === cat.value ? colors.primary : '#E0E0E0'
+                                        }}
+                                    >
+                                        <Text style={{ fontSize: 12, color: newGoalCategory === cat.value ? 'white' : '#666', fontWeight: newGoalCategory === cat.value ? 'bold' : 'normal' }}>
+                                            {cat.label}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+
+                            {/* Sugerencias de IA */}
+                            <AISuggestionCard 
+                                recommendation={aiRecommendation?.message || null}
+                                loading={aiLoading}
+                                isViable={aiRecommendation?.isViable}
+                                suggestedMonthlyAmount={aiRecommendation?.suggestedMonthlyAmount}
+                                tips={aiRecommendation?.tips}
+                            />
+
+                            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
+                                <TouchableOpacity onPress={() => setCreateModalVisible(false)} style={{ padding: 12 }}>
+                                    <Text style={{ color: '#666', fontWeight: '600' }}>Cancelar</Text>
                                 </TouchableOpacity>
-                            ))}
+                                <TouchableOpacity onPress={handleCreateGoal} style={{ backgroundColor: colors.primary, paddingVertical: 12, paddingHorizontal: 20, borderRadius: 10 }}>
+                                    <Text style={{ color: 'white', fontWeight: 'bold' }}>Crear Meta</Text>
+                                </TouchableOpacity>
+                            </View>
+                            </ScrollView>
                         </View>
-
-                        {/* Sugerencias de IA */}
-                        <AISuggestionCard 
-                            recommendation={aiRecommendation?.message || null}
-                            loading={aiLoading}
-                            isViable={aiRecommendation?.isViable}
-                            suggestedMonthlyAmount={aiRecommendation?.suggestedMonthlyAmount}
-                            tips={aiRecommendation?.tips}
-                        />
-
-                        <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
-                            <TouchableOpacity onPress={() => setCreateModalVisible(false)} style={{ padding: 12 }}>
-                                <Text style={{ color: '#666', fontWeight: '600' }}>Cancelar</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={handleCreateGoal} style={{ backgroundColor: colors.primary, paddingVertical: 12, paddingHorizontal: 20, borderRadius: 10 }}>
-                                <Text style={{ color: 'white', fontWeight: 'bold' }}>Crear Meta</Text>
-                            </TouchableOpacity>
-                        </View>
-                        </View>
-                    </ScrollView>
-                </View>
-            </Modal>
+                    </View>
+                </Modal>
         </View>
     );
 };

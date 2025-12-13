@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { dashboardStyles } from './Dashboard.Style';
 import useDashboard from './useDashboard';
 import { FloatingActionButton, MotivationalMessage } from '../../components';
@@ -22,7 +23,7 @@ const Dashboard: React.FC = () => {
     const balance = totalIncome - totalExpense;
 
     return (
-        <View style={{ flex: 1, backgroundColor: '#EAFFF2' }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#EAFFF2' }} edges={["bottom","left","right"]}>
             <View style={{ padding: 16, paddingTop: 10, paddingBottom: 0 }}>
                 {/* Botón de usuario arriba a la derecha */}
                 <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 12 }}>
@@ -115,7 +116,7 @@ const Dashboard: React.FC = () => {
                 onAddExpense={() => { setShowFloatingMenu(false); navigation.navigate('AddExpense'); }}
                 onAddIncome={() => { setShowFloatingMenu(false); navigation.navigate('AddIncome'); }}
             />
-        </View>
+        </SafeAreaView>
     );
 };
 
